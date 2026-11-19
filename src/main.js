@@ -53,6 +53,8 @@ function simulate(){if(state.paused)return;state.day++;const houses=Object.value
 function setTool(t){state.tool=t;routeStart=null;document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tool===t));sceneRef?.drawWorld();ui('tool-help').textContent=t==='road'?'Route : 35 $ par case. Clique le départ puis la destination.':'Outil sélectionné : '+t+'.';}
 function startNewGame(){Object.assign(state,freshState());routeStart=null;sceneRef.cameras.main.setZoom(1);sceneRef.cameras.main.centerOn(sceneRef.scale.width/2,sceneRef.scale.height/2);sceneRef.drawWorld();updateUI();notify('Nouvelle ville créée.');}
 function loadGame(){const raw=localStorage.getItem('citybuilder2d-save');if(!raw){notify('Aucune sauvegarde trouvée. Crée une nouvelle partie.');return;}try{Object.assign(state,freshState(),JSON.parse(raw));routeStart=null;sceneRef.drawWorld();updateUI();ui('main-menu').classList.add('hidden');notify('Partie chargée.');}catch{notify('Sauvegarde illisible.');}}
+ui('menu-new').addEventListener('click',()=>{ui('main-menu').classList.add('hidden');startNewGame();tutorialStep=0;showTutorial();});
+ui('menu-continue').addEventListener('click',()=>{ui('main-menu').classList.add('hidden');loadGame();tutorialStep=0;showTutorial();});
 document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>setTool(b.dataset.tool)));
 document.querySelectorAll('.speed').forEach(b=>b.addEventListener('click',()=>{state.speed=Number(b.dataset.speed);document.querySelectorAll('.speed').forEach(x=>x.classList.toggle('active',x===b));ui('sim-status').textContent=state.paused?'SIMULATION EN PAUSE':'SIMULATION · '+state.speed+'×';}));
 ui('pause').addEventListener('click',()=>{state.paused=!state.paused;ui('pause').textContent=state.paused?'▶':'Ⅱ';ui('sim-status').textContent=state.paused?'SIMULATION EN PAUSE':'SIMULATION · '+state.speed+'×';});
@@ -65,4 +67,4 @@ ui('tutorial-next').addEventListener('click',()=>{if(tutorialStep>=5){ui('tutori
 ui('tutorial-prev').addEventListener('click',()=>{tutorialStep=Math.max(0,tutorialStep-1);showTutorial();});
 window.addEventListener('keydown',e=>{if(e.target instanceof HTMLInputElement)return;const m={v:'select',r:'road',x:'bulldoze'};if(m[e.key.toLowerCase()])setTool(m[e.key.toLowerCase()]);if(e.key==='Escape'&&localStorage.getItem('citybuilder2d-tutorial-done')==='1'){ui('tutorial-panel').classList.add('hidden');}});
 new Phaser.Game({type:Phaser.CANVAS,parent:'game-container',backgroundColor:'#35534b',scale:{mode:Phaser.Scale.RESIZE,width:'100%',height:'100%'},render:{antialias:false,pixelArt:true},scene:[CityScene]});
-setInterval(()=>{for(let n=0;n<state.speed;n++)simulate();},5000);updateUI();if(localStorage.getItem('citybuilder2d-tutorial-done')!=='1'){setTimeout(()=>showTutorial(),350);}
+setInterval(()=>{for(let n=0;n<state.speed;n++)simulate();},5000);updateUI();
