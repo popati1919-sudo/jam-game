@@ -20,8 +20,8 @@ if(['power','water','park','school','clinic'].includes(t?.type)){const col=COLOR
 class CityScene extends Phaser.Scene{
 constructor(){super('city');}
 create(){sceneRef=this;this.cameras.main.setBackgroundColor('#35534b');this.cameras.main.setBounds(-4000,-4000,8000,8000);this.input.mouse.disableContextMenu();this.drawWorld();
-this.input.on('pointerdown',p=>{if(p.button===2||p.middleButton){this.dragPointer=p;return;}this.place(p);});
-this.input.on('pointermove',p=>{if(this.dragPointer&&p.isDown){const cam=this.cameras.main;cam.scrollX-=(p.x-this.dragPointer.x)/cam.zoom;cam.scrollY-=(p.y-this.dragPointer.y)/cam.zoom;this.dragPointer=p;}});
+this.input.on('pointerdown',p=>{if(p.button===2||p.middleButton){this.dragPointer={x:p.x,y:p.y};return;}this.place(p);});
+this.input.on('pointermove',p=>{if(this.dragPointer&&p.isDown){const cam=this.cameras.main;cam.scrollX-=(p.x-this.dragPointer.x)/cam.zoom;cam.scrollY-=(p.y-this.dragPointer.y)/cam.zoom;this.dragPointer={x:p.x,y:p.y};}});
 this.input.on('pointerup',()=>{this.dragPointer=null;});
 this.input.on('wheel',(p,objects,dx,dy)=>{const cam=this.cameras.main;const before=cam.getWorldPoint(p.x,p.y);cam.setZoom(Phaser.Math.Clamp(cam.zoom*(dy>0?.9:1.1),.55,2.2));const after=cam.getWorldPoint(p.x,p.y);cam.scrollX+=before.x-after.x;cam.scrollY+=before.y-after.y;});
 this.scale.on('resize',()=>this.drawWorld());
