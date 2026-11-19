@@ -3,9 +3,14 @@
 .menu-overlay,.dialog-overlay{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(7,15,20,.88);backdrop-filter:blur(7px);padding:20px}.menu-card,.dialog-card{width:min(440px,100%);background:#172630;border:1px solid #52675d;border-radius:14px;padding:32px;box-shadow:0 24px 90px #0009}.menu-card{text-align:center}.menu-kicker{font:10px 'DM Mono';letter-spacing:2px;color:#b4df72}.menu-card h1{font-size:43px;letter-spacing:-3px;margin:20px 0 8px;color:#f1f5f5}.menu-card h1 span{color:#b4df72}.menu-card h1 small{font-size:15px;letter-spacing:0;margin-left:6px;color:#9fb1aa}.menu-card p,.dialog-card p{font-size:13px;line-height:1.7;color:#b4c3c5}.menu-primary,.menu-button{width:100%;padding:12px;border-radius:7px;margin-top:9px;border:1px solid #40534f;background:#243841;color:#eaf0ec;font-weight:700}.menu-primary{background:#b4df72;color:#1a2a25;border-color:#b4df72}.menu-foot{display:block;margin-top:20px;color:#82969b;font-size:10px;line-height:1.6}.hidden{display:none!important}.dialog-card{position:relative}.dialog-card h2{margin:12px 0;font-size:24px}.dialog-card p{margin:10px 0}.dialog-close{position:absolute;right:15px;top:15px;border:0;background:transparent;color:#dce8e2;font-size:18px}.tutorial-actions{display:flex;gap:10px;margin-top:20px}.tutorial-actions button{flex:1}.tutorial-shortcut{width:calc(100% - 8px);margin:0 4px 8px}.world{cursor:crosshair}#game-container canvas{touch-action:none}#game-container{user-select:none}@media(max-width:620px){.menu-card,.dialog-card{padding:22px}.menu-card h1{font-size:34px}}
 
 /* The tutorial is a small, dismissible guide docked above the map, not a full-screen modal. */
-.dialog-overlay{position:fixed;inset:88px 260px auto auto;z-index:19;display:block;width:min(340px,calc(100vw - 285px));padding:0;background:transparent;backdrop-filter:none;pointer-events:none}
-.dialog-card{width:100%;padding:20px 22px;pointer-events:auto;box-shadow:0 10px 35px #0008}
-.dialog-card h2{font-size:19px;margin:8px 0}.dialog-card p{font-size:11px;line-height:1.5;white-space:pre-line;margin:7px 0}
-.tutorial-actions{margin-top:12px}.tutorial-actions button{padding:9px;font-size:11px}
-@media(max-width:900px){.dialog-overlay{right:8px;width:min(320px,calc(100vw - 205px))}}
-@media(max-width:620px){.dialog-overlay{top:140px;right:6px;width:min(290px,calc(100vw - 140px))}.dialog-card{padding:13px}.dialog-card h2{font-size:16px}.dialog-card p{font-size:10px}}
+
+/* Compact tutorial embedded in the construction sidebar, beside the tools. */
+.dialog-overlay{position:relative;inset:auto;z-index:3;display:block;width:100%;padding:0;margin:10px 0 14px;background:transparent;backdrop-filter:none;pointer-events:auto}
+.dialog-card{position:relative;width:100%;padding:12px 10px 10px;border:1px solid #52675d;border-radius:8px;background:#20323a;box-shadow:0 5px 16px #0004}
+.dialog-card .menu-kicker{font-size:8px;letter-spacing:1px;padding-right:18px}
+.dialog-card h2{font-size:13px;line-height:1.3;margin:8px 0}
+.dialog-card p{font-size:10px;line-height:1.45;white-space:pre-line;margin:6px 0;color:#c0cdca}
+.dialog-close{right:7px;top:6px;width:23px;height:23px;display:grid;place-items:center;border:1px solid #53675f;border-radius:5px;background:#2b4146;color:#fff;font-size:14px;line-height:1;z-index:2}
+.tutorial-actions{display:flex;gap:5px;margin-top:9px}
+.tutorial-actions button{flex:1;min-width:0;padding:7px 4px;margin-top:0;border-radius:5px;font-size:9px}
+@media(max-width:620px){.dialog-overlay{margin:8px 0 10px}.dialog-card{padding:10px 7px 8px}.dialog-card h2{font-size:11px}.dialog-card p{font-size:9px}.dialog-card .menu-kicker{font-size:7px}.tutorial-actions button{font-size:8px;padding:6px 2px}}
