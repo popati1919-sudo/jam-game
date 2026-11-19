@@ -22,14 +22,31 @@ if(['power','water','park','school','clinic'].includes(t?.type)){if(t.type==='pa
 }
 class CityScene extends Phaser.Scene{
 constructor(){super('city');}
-create(){sceneRef=this;this.cameras.main.setBackgroundColor('#35534b');this.cameras.main.setBounds(-4000,-4000,8000,8000);this.input.mouse.disableContextMenu();this.drawWorld();const entryView=iso(9,12);this.cameras.main.centerOn(entryView.x,entryView.y);
+create(){sceneRef=this;this.vehicles=[];this.vehicleClock=0;this.cameras.main.setBackgroundColor('#35534b');this.cameras.main.setBounds(-4000,-4000,8000,8000);this.input.mouse.disableContextMenu();this.drawWorld();const entryView=iso(9,12);this.cameras.main.centerOn(entryView.x,entryView.y);
 this.input.on('pointerdown',p=>{if(p.button===2||p.middleButton){this.dragPointer={x:p.x,y:p.y};return;}this.place(p);});
 this.input.on('pointermove',p=>{if(this.dragPointer&&p.isDown){const cam=this.cameras.main;cam.scrollX-=(p.x-this.dragPointer.x)/cam.zoom;cam.scrollY-=(p.y-this.dragPointer.y)/cam.zoom;this.dragPointer={x:p.x,y:p.y};}});
 this.input.on('pointerup',()=>{this.dragPointer=null;});
 this.input.on('wheel',(p,objects,dx,dy)=>{const cam=this.cameras.main;const before=cam.getWorldPoint(p.x,p.y);cam.setZoom(Phaser.Math.Clamp(cam.zoom*(dy>0?.9:1.1),.55,2.2));const after=cam.getWorldPoint(p.x,p.y);cam.scrollX+=before.x-after.x;cam.scrollY+=before.y-after.y;});
 this.scale.on('resize',()=>this.drawWorld());
 }
-drawWorld(){this.children.removeAll();for(let x=0;x<GRID;x++)for(let y=0;y<GRID;y++)drawTile(this,x,y,get(x,y));const gate=iso(0,12);this.add.text(gate.x+4,gate.y-24,'ENTRÉE DE LA VILLE',{fontFamily:'monospace',fontSize:'10px',color:'#fff3c4',backgroundColor:'#263b36',padding:{x:4,y:3}}).setOrigin(0,.5).setDepth(9999);if(routeStart){const p=iso(routeStart.x,routeStart.y);this.add.circle(p.x,p.y,9,0xf4d35e).setStrokeStyle(3,0x26352e).setDepth(9999);}}
+update(time,delta){
+if(state.paused)return;
+this.vehicleClock+=delta;
+if(this.vehicleClock>=6500&&this.vehicles.length<6){this.vehicleClock=0;const route=this.findDestinationRoute();if(route&&route.length>1){const start=iso(route[0].x,route[0].y),dest=route[route.length-1].type;const color=dest==='residential'?0xf2e5c4:dest==='commercial'?0xf2c45c:0xb9c8d8;const sprite=this.add.rectangle(start.x,start.y,13,8,color).setStrokeStyle(1,0x26352e).setDepth(10000);this.vehicles.push({route,index:0,progress:0,sprite});}}
+for(let i=this.vehicles.length-1;i>=0;i--){const v=this.vehicles[i];v.progress+=delta/1000*1.15;while(v.progress>=1&&v.index<v.route.length-1){v.progress-=1;v.index++;}if(v.index>=v.route.length-1){v.sprite.destroy();this.vehicles.splice(i,1);continue;}const a=iso(v.route[v.index].x,v.route[v.index].y),b=iso(v.route[v.index+1].x,v.route[v.index+1].y),t=v.progress;v.sprite.setPosition(Phaser.Math.Linear(a.x,b.x,t),Phaser.Math.Linear(a.y,b.y,t));v.sprite.setRotation(Math.atan2(b.y-a.y,b.x-a.x));}
+}
+findDestinationRoute(){
+const queue=[],parent=new Map(),seen=new Set();
+for(let y=0;y<GRID;y++)if(get(0,y)?.type==='road'){const k=key(0,y);seen.add(k);parent.set(k,null);queue.push({x:0,y});}
+for(let i=0;i<queue.length;i++){const p=queue[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const x=p.x+dx,y=p.y+dy,k=key(x,y);if(x>=0&&y>=0&&x<GRID&&y<GRID&&!seen.has(k)&&get(x,y)?.type==='road'){seen.add(k);parent.set(k,key(p.x,p.y));queue.push({x,y});}}}
+const destinations=[];
+for(const [k,t] of Object.entries(state.tiles)){if(!['residential','commercial','industrial'].includes(t.type))continue;const [x,y]=k.split(',').map(Number);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const rx=x+dx,ry=y+dy,rk=key(rx,ry);if(seen.has(rk)){destinations.push({x,y,type:t.type,roadKey:rk});break;}}}
+if(!destinations.length)return null;
+const target=Phaser.Utils.Array.GetRandom(destinations),roadPath=[];let cursor=target.roadKey;
+while(cursor){const [x,y]=cursor.split(',').map(Number);roadPath.push({x,y});cursor=parent.get(cursor);}
+roadPath.reverse();roadPath.push({x:target.x,y:target.y,type:target.type});return roadPath;
+}
+drawWorld(){this.children.removeAll();this.vehicles=[];this.vehicleClock=0;for(let x=0;x<GRID;x++)for(let y=0;y<GRID;y++)drawTile(this,x,y,get(x,y));const gate=iso(0,12);this.add.text(gate.x+4,gate.y-24,'ENTRÉE DE LA VILLE',{fontFamily:'monospace',fontSize:'10px',color:'#fff3c4',backgroundColor:'#263b36',padding:{x:4,y:3}}).setOrigin(0,.5).setDepth(9999);if(routeStart){const p=iso(routeStart.x,routeStart.y);this.add.circle(p.x,p.y,9,0xf4d35e).setStrokeStyle(3,0x26352e).setDepth(9999);}}
 place(p){const g=gridAt(p.x,p.y);if(g.x<0||g.y<0||g.x>=GRID||g.y>=GRID)return;const old=get(g.x,g.y),tool=state.tool;if(riverAt(g.x,g.y)&&!old){notify('La rivière est un terrain naturel : construis autour.');return;}
 if(tool==='road'){this.routeClick(g);return;}
 if(routeStart){routeStart=null;this.drawWorld();}
@@ -67,7 +84,7 @@ const tutorialSteps=[
 {title:'2 · Construis un quartier résidentiel',text:'Choisis Résidentiel et place au moins une zone juste à côté d’une route.',action:'housing',hint:'Place une zone résidentielle adjacente à une route.'},
 {title:'3 · Fournis l’électricité et l’eau',text:'Construis une centrale électrique et un château d’eau.',action:'services',hint:'Construis une centrale ET un château d’eau.'},
 {title:'4 · Lance la simulation',text:'Démarre la simulation avec le bouton ▶.',action:'simulation',hint:'Clique sur ▶ pour démarrer la simulation.'},
-{title:'Tu es prêt !',text:'Développe ta ville. Garde tes rues connectées à la route d’entrée au bord gauche pour permettre l’arrivée des habitants.',action:null}
+{title:'Tu es prêt !',text:'Développe ta ville. Garde tes rues reliées à l’entrée de gauche : les véhicules entreront par cette route et rejoindront uniquement les quartiers et lieux de travail accessibles.',action:null}
 ];
 function tutorialRequirementMet(action){if(action==='road')return Object.entries(state.tiles).some(([k,v])=>v.type==='road'&&Number(k.split(',')[0])>8);if(action==='housing')return Object.values(state.tiles).some(v=>v.type==='residential');if(action==='services')return Object.values(state.tiles).some(v=>v.type==='power')&&Object.values(state.tiles).some(v=>v.type==='water');if(action==='simulation')return !state.paused;return true;}
 function showTutorial(){tutorialActive=true;const step=tutorialSteps[tutorialStep];ui('tutorial-title').textContent=step.title;ui('tutorial-text').textContent=step.text+(step.hint?'\n\n'+step.hint:'');ui('tutorial-count').textContent=(tutorialStep+1)+' / '+tutorialSteps.length;ui('tutorial-prev').disabled=tutorialStep===0;ui('tutorial-next').textContent=tutorialStep===tutorialSteps.length-1?'Terminer':'Suivant';ui('tutorial-next').disabled=!!step.action&&!tutorialRequirementMet(step.action);ui('tutorial-panel').classList.remove('hidden');}
