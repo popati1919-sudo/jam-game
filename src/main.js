@@ -4,7 +4,7 @@ import './style.css';
 const GRID=64,TILE_W=40,TILE_H=40;
 const COST={road:35,power:2500,water:1800,park:700,school:3000,clinic:4000};
 const COLORS={grass:0x648d62,grass2:0x6d9867,road:0x59636a,residential:0x86c77b,commercial:0xe7bd68,industrial:0xd58a72,power:0xd7a85b,water:0x6cb7cb,park:0x75b879,school:0xd5c18b,clinic:0xe18b8b};
-const freshState=()=>({money:25000,day:1,population:0,happiness:65,speed:1,paused:true,tool:'select',tiles:{},buildings:[],residents:0,jobs:0,power:0,water:0});
+const freshState=()=>{const tiles={};for(let x=27;x<=36;x++)tiles[x+',20']={type:'road'};return{money:25000,day:1,population:0,happiness:65,speed:1,paused:true,tool:'select',tiles,buildings:[],residents:0,jobs:0,power:0,water:0};};
 const state=freshState();
 const key=(x,y)=>x+','+y,get=(x,y)=>state.tiles[key(x,y)],ui=id=>document.getElementById(id);
 let sceneRef,toastTimer,routeStart=null,tutorialStep=0;
@@ -30,7 +30,7 @@ this.input.on('wheel',(p,objects,dx,dy)=>{const cam=this.cameras.main;const befo
 this.scale.on('resize',()=>this.drawWorld());
 }
 drawWorld(){this.children.removeAll();this.cars=[];for(let x=0;x<GRID;x++)for(let y=0;y<GRID;y++)drawTile(this,x,y,get(x,y));this.spawnCars();if(routeStart){const p=iso(routeStart.x,routeStart.y);this.add.circle(p.x,p.y,9,0xf4d35e).setStrokeStyle(3,0x26352e).setDepth(9999);}}
-spawnCars(){const roads=[];for(let x=0;x<GRID;x++)for(let y=0;y<GRID;y++)if(get(x,y)?.type==='road')roads.push({x,y});if(roads.length<2)return;for(let n=0;n<Math.min(roads.length,12);n+=Math.max(1,Math.floor(roads.length/12))){const r=roads[n],g=this.add.rectangle(0,0,12,7,[0xf4d35e,0xe76f51,0x8ecae6,0xf1f5f5][this.cars.length%4]).setStrokeStyle(1,0x26352e).setDepth(9998);this.cars.push({g,x:r.x,y:r.y,tx:r.x,ty:r.y,progress:0});}}
+spawnCars(){const roads=[];for(let x=0;x<GRID;x++)for(let y=0;y<GRID;y++)if(get(x,y)?.type==='road')roads.push({x,y});if(roads.length<2)return;for(let n=0;n<Math.min(roads.length,12);n+=Math.max(1,Math.ceil(roads.length/3))){const r=roads[n],g=this.add.rectangle(0,0,12,7,[0xf4d35e,0xe76f51,0x8ecae6,0xf1f5f5][this.cars.length%4]).setStrokeStyle(1,0x26352e).setDepth(9998);this.cars.push({g,x:r.x,y:r.y,tx:r.x,ty:r.y,progress:0});}}
 update(time,delta){for(const car of this.cars){if(car.x===car.tx&&car.y===car.ty){const opts=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:car.x+dx,y:car.y+dy})).filter(p=>get(p.x,p.y)?.type==='road');if(!opts.length)continue;const next=opts[(Math.floor(time/500)+this.cars.indexOf(car))%opts.length];car.tx=next.x;car.ty=next.y;car.progress=0;}car.progress=Math.min(1,car.progress+delta/1100);const a=iso(car.x,car.y),b=iso(car.tx,car.ty);car.g.setPosition(Phaser.Math.Linear(a.x,b.x,car.progress),Phaser.Math.Linear(a.y,b.y,car.progress));if(car.progress>=1){car.x=car.tx;car.y=car.ty;}}}
 place(p){const g=gridAt(p.x,p.y);if(g.x<0||g.y<0||g.x>=GRID||g.y>=GRID)return;const old=get(g.x,g.y),tool=state.tool;if(riverAt(g.x,g.y)&&!old){notify('La rivière est un terrain naturel : construis autour.');return;}
 if(tool==='road'){this.routeClick(g);return;}
