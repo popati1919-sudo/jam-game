@@ -13,13 +13,46 @@ function iso(x,y){return{x:x*TILE_W+(sceneRef.scale.width-GRID*TILE_W)/2+TILE_W/
 function gridAt(px,py){const p=sceneRef.cameras.main.getWorldPoint(px,py),ox=(sceneRef.scale.width-GRID*TILE_W)/2,oy=(sceneRef.scale.height-GRID*TILE_H)/2;return{x:Math.floor((p.x-ox)/TILE_W),y:Math.floor((p.y-oy)/TILE_H)};}
 function riverAt(x,y){const center=31+Math.round(Math.sin(x*.16)*5+Math.sin(x*.047)*3);return Math.abs(y-center)<=1;}
 function roadNear(x,y){return[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>get(x+dx,y+dy)?.type==='road');}
-function drawTile(s,x,y,t){const p=iso(x,y);let c=riverAt(x,y)?COLORS.water:((x+y)%2?COLORS.grass:COLORS.grass2);if(t?.type==='road')c=COLORS.road;if(t?.type==='residential')c=COLORS.residential;if(t?.type==='commercial')c=COLORS.commercial;if(t?.type==='industrial')c=COLORS.industrial;
-s.add.rectangle(p.x,p.y,TILE_W-1,TILE_H-1,c).setStrokeStyle(1,0x314c3b,.32).setDepth(y*GRID+x);
-if(riverAt(x,y)){s.add.rectangle(p.x,p.y,TILE_W-1,TILE_H-1,COLORS.water).setDepth(y*GRID+x+.1);}
-if(t?.type==='road'){const h=get(x-1,y)?.type==='road'||get(x+1,y)?.type==='road',v=get(x,y-1)?.type==='road'||get(x,y+1)?.type==='road';if(h)s.add.rectangle(p.x,p.y,TILE_W,2,0xd5d0aa).setDepth(y*GRID+x+.2);if(v)s.add.rectangle(p.x,p.y,2,TILE_H,0xd5d0aa).setDepth(y*GRID+x+.2);if(!h&&!v)s.add.circle(p.x,p.y,2,0xd5d0aa).setDepth(y*GRID+x+.2);}
-if(t&&['residential','commercial','industrial','power','water','park','school','clinic'].includes(t.type)&&!(t.type==='residential'&&!t.built)){const frames={residential:0,commercial:4,industrial:5,power:10,water:12,park:12,school:6,clinic:7};const frame=t.type==='residential'?((x*3+y)%4):frames[t.type];s.add.image(p.x,p.y-4,t.type==='residential'||t.type==='power'||t.type==='water'?'city-upgrades':'city-assets',frame).setDisplaySize(t.type==='residential'?52:48,t.type==='residential'?52:48).setDepth(y*GRID+x+2);return;}
-if(['residential','commercial','industrial'].includes(t?.type)){if(t.type==='residential'&&!t.built){s.add.rectangle(p.x,p.y,34,32,t.building?0xb78a52:0x9b865f).setStrokeStyle(2,0x66513b).setDepth(y*GRID+x+1);s.add.rectangle(p.x,p.y+7,22,8,0xd6b77d).setStrokeStyle(1,0x80613d).setDepth(y*GRID+x+2);if(t.building){s.add.image(p.x,p.y-5,'city-upgrades',4).setDisplaySize(48,48).setDepth(y*GRID+x+3);s.add.image(p.x+13,p.y-20,'city-upgrades',5).setDisplaySize(39,39).setDepth(y*GRID+x+4);s.add.text(p.x,p.y+17,'CHANTIER',{fontFamily:'monospace',fontSize:'6px',color:'#fff4d6',backgroundColor:'#76502d',padding:{x:2,y:1}}).setOrigin(.5).setDepth(y*GRID+x+5);}else{s.add.text(p.x,p.y-8,'À CONSTRUIRE',{fontFamily:'monospace',fontSize:'5px',color:'#fff4d6',backgroundColor:'#526b42',padding:{x:2,y:1}}).setOrigin(.5).setDepth(y*GRID+x+3);}}else{const w=t.type==='industrial'?31:25,h=t.type==='commercial'?28:24,col=t.type==='residential'?0xd8c9a0:t.type==='commercial'?0xd5b879:0xa9a39a;s.add.rectangle(p.x,p.y,w,h,col).setStrokeStyle(2,0x394b43).setDepth(y*GRID+x+1);s.add.rectangle(p.x,p.y-h/2+3,w+2,6,t.type==='residential'?0x9d6652:0x687f8b).setDepth(y*GRID+x+2);s.add.rectangle(p.x,p.y+2,5,7,0x536b78).setDepth(y*GRID+x+3);}}
-if(['power','water','park','school','clinic'].includes(t?.type)){if(t.type==='park'){s.add.rectangle(p.x,p.y,38,38,0x4d8753).setDepth(y*GRID+x+1);s.add.circle(p.x-8,p.y-4,7,0x8dbb6b).setDepth(y*GRID+x+2);s.add.circle(p.x+8,p.y+7,6,0x9bc979).setDepth(y*GRID+x+2);}else{s.add.rectangle(p.x,p.y,30,28,COLORS[t.type]).setStrokeStyle(2,0x344b42).setDepth(y*GRID+x+1);s.add.rectangle(p.x,p.y-8,11,7,0xe2d8bb).setDepth(y*GRID+x+2);}}
+function drawTile(s,x,y,t){
+const p=iso(x,y),depth=y*GRID+x;
+let ground=riverAt(x,y)?COLORS.water:((x+y)%2?COLORS.grass:COLORS.grass2);
+if(t?.type==='road')ground=COLORS.road;
+s.add.rectangle(p.x,p.y,TILE_W-1,TILE_H-1,ground).setStrokeStyle(1,0x314c3b,.22).setDepth(depth);
+if(riverAt(x,y)&&t?.type!=='road')s.add.rectangle(p.x,p.y,TILE_W-1,TILE_H-1,COLORS.water).setDepth(depth+.1);
+if(t?.type==='road'){
+const h=get(x-1,y)?.type==='road'||get(x+1,y)?.type==='road',v=get(x,y-1)?.type==='road'||get(x,y+1)?.type==='road';
+if(h)s.add.rectangle(p.x,p.y,TILE_W,2,0xd5d0aa).setDepth(depth+.2);
+if(v)s.add.rectangle(p.x,p.y,2,TILE_H,0xd5d0aa).setDepth(depth+.2);
+if(!h&&!v)s.add.circle(p.x,p.y,2,0xd5d0aa).setDepth(depth+.2);
+return;
+}
+if(!t)return;
+// Zones and service buildings always use illustrated sprite artwork; never draw the old green/black placeholder rectangles.
+if(['residential','commercial','industrial'].includes(t.type)){
+if(t.type==='residential'&&!t.built){
+s.add.image(p.x,p.y-3,'city-upgrades',4).setDisplaySize(54,54).setDepth(depth+2);
+if(t.building)s.add.image(p.x+12,p.y-18,'city-upgrades',5).setDisplaySize(43,43).setDepth(depth+3);
+s.add.text(p.x,p.y+17,t.building?'CHANTIER':'À CONSTRUIRE',{fontFamily:'monospace',fontSize:'6px',color:'#fff4d6',backgroundColor:'#76502d',padding:{x:2,y:1}}).setOrigin(.5).setDepth(depth+4);
+return;
+}
+const frame=t.type==='residential'?((x*3+y)%4):t.type==='commercial'?4:5;
+const texture=t.type==='residential'?'city-upgrades':'city-assets';
+s.add.image(p.x,p.y-5,texture,frame).setDisplaySize(54,54).setDepth(depth+2);
+return;
+}
+const sprites={
+power:{texture:'city-upgrades',frame:10},water:{texture:'city-upgrades',frame:12},
+park:{texture:'city-assets',frame:12},school:{texture:'city-assets',frame:6},
+clinic:{texture:'city-assets',frame:7},police:{texture:'city-assets',frame:8},
+fire:{texture:'city-assets',frame:9},substation:{texture:'city-upgrades',frame:11},
+pumping:{texture:'city-upgrades',frame:13},reservoir:{texture:'city-upgrades',frame:14},
+wind:{texture:'city-upgrades',frame:15}
+};
+const sprite=sprites[t.type];
+if(sprite){s.add.image(p.x,p.y-5,sprite.texture,sprite.frame).setDisplaySize(54,54).setDepth(depth+2);return;}
+// Safe visual fallback for unknown future building types: use the illustrated construction-site sprite, not a colored square.
+s.add.image(p.x,p.y-4,'city-upgrades',4).setDisplaySize(54,54).setDepth(depth+2);
+s.add.image(p.x+12,p.y-18,'city-upgrades',5).setDisplaySize(43,43).setDepth(depth+3);
 }
 class CityScene extends Phaser.Scene{
 constructor(){super('city');}
