@@ -15,29 +15,56 @@ function riverAt(x,y){const center=31+Math.round(Math.sin(x*.16)*5+Math.sin(x*.0
 function roadNear(x,y){return[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>get(x+dx,y+dy)?.type==='road');}
 function drawTile(s,x,y,t){
 const p=iso(x,y),depth=y*GRID+x;
-let ground=riverAt(x,y)?COLORS.water:((x+y)%2?COLORS.grass:COLORS.grass2);
-if(t?.type==='road')ground=COLORS.road;
-s.add.rectangle(p.x,p.y,TILE_W-1,TILE_H-1,ground).setStrokeStyle(1,0x314c3b,.22).setDepth(depth);
-if(riverAt(x,y)&&t?.type!=='road')s.add.rectangle(p.x,p.y,TILE_W-1,TILE_H-1,COLORS.water).setDepth(depth+.1);
+const grass=riverAt(x,y)?0x75aeb0:((x*17+y*31)%5===0?0x71996a:((x+y)%2?0x729b6b:0x789f70));
 if(t?.type==='road'){
+s.add.rectangle(p.x,p.y,TILE_W+1,TILE_H+1,0x424e53).setDepth(depth);
+s.add.rectangle(p.x,p.y,TILE_W-2,TILE_H-2,0x59666b).setDepth(depth+.1);
 const h=get(x-1,y)?.type==='road'||get(x+1,y)?.type==='road',v=get(x,y-1)?.type==='road'||get(x,y+1)?.type==='road';
-if(h)s.add.rectangle(p.x,p.y,TILE_W,2,0xd5d0aa).setDepth(depth+.2);
-if(v)s.add.rectangle(p.x,p.y,2,TILE_H,0xd5d0aa).setDepth(depth+.2);
-if(!h&&!v)s.add.circle(p.x,p.y,2,0xd5d0aa).setDepth(depth+.2);
+const junction=h&&v;
+if(h||!v){
+s.add.rectangle(p.x,p.y-TILE_H/2+2,TILE_W,1,0x9ba7a0,.65).setDepth(depth+.2);
+s.add.rectangle(p.x,p.y+TILE_H/2-2,TILE_W,1,0x9ba7a0,.65).setDepth(depth+.2);
+}
+if(v||!h){
+s.add.rectangle(p.x-TILE_W/2+2,p.y,1,TILE_H,0x9ba7a0,.65).setDepth(depth+.2);
+s.add.rectangle(p.x+TILE_W/2-2,p.y,1,TILE_H,0x9ba7a0,.65).setDepth(depth+.2);
+}
+if(h&&!junction)s.add.rectangle(p.x,p.y,10,1.5,0xe8d78a,.9).setDepth(depth+.3);
+if(v&&!junction)s.add.rectangle(p.x,p.y,1.5,10,0xe8d78a,.9).setDepth(depth+.3);
+if(junction)s.add.circle(p.x,p.y,2,0xe8d78a,.7).setDepth(depth+.3);
 return;
 }
-if(!t)return;
-const place=(key,offset=0,size=58)=>s.add.image(p.x,p.y-5+offset,key).setDisplaySize(size,size).setDepth(depth+2+offset*.01);
+s.add.rectangle(p.x,p.y,TILE_W-1,TILE_H-1,grass).setStrokeStyle(1,0x355a42,.13).setDepth(depth);
+if(riverAt(x,y)&&t?.type!=='road'){
+s.add.rectangle(p.x,p.y,TILE_W-1,TILE_H-1,0x6da5aa,.35).setDepth(depth+.1);
+s.add.line(p.x-10,p.y-7,p.x-10,p.y-7,p.x+10,p.y-7,0xb4d8ce,.25).setDepth(depth+.2);
+}
+if(!t){
+const seed=(x*73856093^y*19349663)>>>0;
+if(seed%7===0){
+s.add.ellipse(p.x+((seed>>>4)%17)-8,p.y+((seed>>>9)%15)-7,5,2,0x9ab77b,.22).setDepth(depth+.3);
+}
+if(seed%29===0){
+s.add.circle(p.x-8,p.y+7,1.4,0xd9d18b,.8).setDepth(depth+.3);
+s.add.circle(p.x-5,p.y+8,1.2,0xe7e0b0,.8).setDepth(depth+.3);
+}
+return;
+}
+// A neat landscaped lot visually anchors every building to its square plot.
+s.add.ellipse(p.x,p.y+12,34,10,0x344c3b,.18).setDepth(depth+1);
+s.add.rectangle(p.x,p.y+14,34,7,0x71945e,.9).setDepth(depth+1.1);
+s.add.rectangle(p.x,p.y+14,14,3,0xc6b58a,.9).setDepth(depth+1.2);
+const place=(key,offset=0,size=62)=>s.add.image(p.x,p.y-7+offset,key).setDisplaySize(size,size).setDepth(depth+2+offset*.01);
 if(t.type==='residential'&&!t.built){
 place('foundation',0,62);
 if(t.building)place('crane',-18,58);
-s.add.text(p.x,p.y+17,t.building?'CHANTIER':'À CONSTRUIRE',{fontFamily:'monospace',fontSize:'6px',color:'#fff4d6',backgroundColor:'#76502d',padding:{x:2,y:1}}).setOrigin(.5).setDepth(depth+5);
+s.add.text(p.x,p.y+18,t.building?'CHANTIER':'À CONSTRUIRE',{fontFamily:'monospace',fontSize:'6px',color:'#fff4d6',backgroundColor:'#76502d',padding:{x:3,y:2}}).setOrigin(.5).setDepth(depth+5);
 return;
 }
 const houses=['house1','house2','house3','house4'];
 const map={residential:houses[(x*3+y)%4],commercial:'shop',industrial:'factory',power:'power',water:'tower',park:'park',school:'school',clinic:'clinic',police:'police',fire:'fire',substation:'substation',pumping:'pump',reservoir:'reservoir'};
 const sprite=map[t.type];
-if(sprite){place(sprite,0,62);return;}
+if(sprite){place(sprite,0,64);return;}
 place('foundation',0,62);
 if(t.building)place('crane',-18,58);
 }
