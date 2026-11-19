@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import './style.css';
 
-const GRID=40,TILE_W=64,TILE_H=32;
+const GRID=40,TILE_W=48,TILE_H=48;
 const COST={road:35,power:2500,water:1800,park:700,school:3000,clinic:4000};
 const COLORS={grass:0x648d62,grass2:0x6d9867,road:0x59636a,residential:0x86c77b,commercial:0xe7bd68,industrial:0xd58a72,power:0xd7a85b,water:0x6cb7cb,park:0x75b879,school:0xd5c18b,clinic:0xe18b8b};
 const freshState=()=>({money:25000,day:1,population:0,happiness:65,speed:1,paused:true,tool:'select',tiles:{},buildings:[],residents:0,jobs:0,power:0,water:0});
@@ -9,14 +9,15 @@ const state=freshState();
 const key=(x,y)=>x+','+y,get=(x,y)=>state.tiles[key(x,y)],ui=id=>document.getElementById(id);
 let sceneRef,toastTimer,routeStart=null,tutorialStep=0;
 function notify(msg){const el=ui('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2400);ui('city-news').textContent=msg;}
-function iso(x,y){return{x:(x-y)*TILE_W/2+sceneRef.scale.width/2,y:(x+y)*TILE_H/2+65};}
-function gridAt(px,py){const p=sceneRef.cameras.main.getWorldPoint(px,py),xx=p.x-sceneRef.scale.width/2,yy=p.y-65;return{x:Math.floor((xx/TILE_W+yy/TILE_H)/2),y:Math.floor((yy/TILE_H-xx/TILE_W)/2)};}
+function iso(x,y){return{x:x*TILE_W+(sceneRef.scale.width-GRID*TILE_W)/2+TILE_W/2,y:y*TILE_H+(sceneRef.scale.height-GRID*TILE_H)/2+TILE_H/2};}
+function gridAt(px,py){const p=sceneRef.cameras.main.getWorldPoint(px,py),ox=(sceneRef.scale.width-GRID*TILE_W)/2,oy=(sceneRef.scale.height-GRID*TILE_H)/2;return{x:Math.floor((p.x-ox)/TILE_W),y:Math.floor((p.y-oy)/TILE_H)};}
 function roadNear(x,y){return[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>get(x+dx,y+dy)?.type==='road');}
 function drawTile(s,x,y,t){const p=iso(x,y);let c=(x+y)%2?COLORS.grass:COLORS.grass2;if(t?.type==='road')c=COLORS.road;if(t?.type==='residential')c=COLORS.residential;if(t?.type==='commercial')c=COLORS.commercial;if(t?.type==='industrial')c=COLORS.industrial;
-s.add.polygon(p.x,p.y,[0,-TILE_H/2,TILE_W/2,0,0,TILE_H/2,-TILE_W/2,0],c).setStrokeStyle(1,0x314c3b,.55).setDepth(x+y);
-if(t?.type==='road')s.add.line(p.x,p.y,-TILE_W/2,0,TILE_W/2,0,0xd5d0aa,.65).setLineWidth(1).setDepth(x+y+.2);
-if(['residential','commercial','industrial'].includes(t?.type)){const h=t.type==='residential'?18:t.type==='commercial'?25:15,w=t.type==='industrial'?23:19,col=t.type==='residential'?0xd8c9a0:t.type==='commercial'?0xd5b879:0xa9a39a;const b=s.add.container(p.x,p.y-12);b.add([s.add.rectangle(0,-h/2,w,h,col).setStrokeStyle(1,0x394b43),s.add.rectangle(0,-h,w+3,5,t.type==='residential'?0x9d6652:0x687f8b)]);b.setDepth(x+y+2);}
-if(['power','water','park','school','clinic'].includes(t?.type)){const col=COLORS[t.type];s.add.rectangle(p.x,p.y-10,20,17,col).setStrokeStyle(1,0x344b42).setDepth(x+y+2);s.add.rectangle(p.x,p.y-20,9,5,0xe2d8bb).setDepth(x+y+3);}}
+s.add.rectangle(p.x,p.y,TILE_W-1,TILE_H-1,c).setStrokeStyle(1,0x314c3b,.32).setDepth(y*GRID+x);
+if(t?.type==='road'){const h=get(x-1,y)?.type==='road'||get(x+1,y)?.type==='road',v=get(x,y-1)?.type==='road'||get(x,y+1)?.type==='road';if(h)s.add.rectangle(p.x,p.y,TILE_W,2,0xd5d0aa).setDepth(y*GRID+x+.2);if(v)s.add.rectangle(p.x,p.y,2,TILE_H,0xd5d0aa).setDepth(y*GRID+x+.2);if(!h&&!v)s.add.circle(p.x,p.y,2,0xd5d0aa).setDepth(y*GRID+x+.2);}
+if(['residential','commercial','industrial'].includes(t?.type)){const w=t.type==='industrial'?31:25,h=t.type==='commercial'?28:24,col=t.type==='residential'?0xd8c9a0:t.type==='commercial'?0xd5b879:0xa9a39a;s.add.rectangle(p.x,p.y,w,h,col).setStrokeStyle(2,0x394b43).setDepth(y*GRID+x+1);s.add.rectangle(p.x,p.y-h/2+3,w+2,6,t.type==='residential'?0x9d6652:0x687f8b).setDepth(y*GRID+x+2);s.add.rectangle(p.x,p.y+2,5,7,0x536b78).setDepth(y*GRID+x+3);}
+if(['power','water','park','school','clinic'].includes(t?.type)){if(t.type==='park'){s.add.rectangle(p.x,p.y,38,38,0x4d8753).setDepth(y*GRID+x+1);s.add.circle(p.x-8,p.y-4,7,0x8dbb6b).setDepth(y*GRID+x+2);s.add.circle(p.x+8,p.y+7,6,0x9bc979).setDepth(y*GRID+x+2);}else{s.add.rectangle(p.x,p.y,30,28,COLORS[t.type]).setStrokeStyle(2,0x344b42).setDepth(y*GRID+x+1);s.add.rectangle(p.x,p.y-8,11,7,0xe2d8bb).setDepth(y*GRID+x+2);}}
+}
 class CityScene extends Phaser.Scene{
 constructor(){super('city');}
 create(){sceneRef=this;this.cameras.main.setBackgroundColor('#35534b');this.cameras.main.setBounds(-4000,-4000,8000,8000);this.input.mouse.disableContextMenu();this.drawWorld();
@@ -26,7 +27,7 @@ this.input.on('pointerup',()=>{this.dragPointer=null;});
 this.input.on('wheel',(p,objects,dx,dy)=>{const cam=this.cameras.main;const before=cam.getWorldPoint(p.x,p.y);cam.setZoom(Phaser.Math.Clamp(cam.zoom*(dy>0?.9:1.1),.55,2.2));const after=cam.getWorldPoint(p.x,p.y);cam.scrollX+=before.x-after.x;cam.scrollY+=before.y-after.y;});
 this.scale.on('resize',()=>this.drawWorld());
 }
-drawWorld(){this.children.removeAll();for(let x=0;x<GRID;x++)for(let y=0;y<GRID;y++)drawTile(this,x,y,get(x,y));if(routeStart){const p=iso(routeStart.x,routeStart.y);this.add.circle(p.x,p.y-4,9,0xf4d35e).setStrokeStyle(3,0x26352e).setDepth(9999);}}
+drawWorld(){this.children.removeAll();for(let x=0;x<GRID;x++)for(let y=0;y<GRID;y++)drawTile(this,x,y,get(x,y));if(routeStart){const p=iso(routeStart.x,routeStart.y);this.add.circle(p.x,p.y,9,0xf4d35e).setStrokeStyle(3,0x26352e).setDepth(9999);}}
 place(p){const g=gridAt(p.x,p.y);if(g.x<0||g.y<0||g.x>=GRID||g.y>=GRID)return;const old=get(g.x,g.y),tool=state.tool;
 if(tool==='road'){this.routeClick(g);return;}
 if(routeStart){routeStart=null;this.drawWorld();}
@@ -46,7 +47,7 @@ newTiles.forEach(p=>state.tiles[key(p.x,p.y)]={type:'road'});state.money-=cost;r
 function updateUI(){const a=Object.values(state.tiles),count=t=>a.filter(v=>v.type===t).length,h=count('residential'),c=count('commercial'),i=count('industrial'),power=count('power')*900,water=count('water')*700;state.jobs=c*18+i*35;state.happiness=Math.max(20,Math.min(99,58+count('park')*4+count('school')*3+count('clinic')*3-Math.max(0,i-h)*2));ui('money').textContent='$ '+Math.floor(state.money).toLocaleString('fr-CA');ui('population').textContent=state.residents.toLocaleString('fr-CA');ui('happiness').textContent=state.residents?state.happiness+' %':'—';ui('jobs').textContent=state.jobs;ui('power-status').textContent=state.residents?Math.min(power,state.residents*1.2)+' / '+Math.ceil(state.residents*1.2):'0 / 0';ui('water-status').textContent=state.residents?Math.min(water,state.residents)+' / '+state.residents:'0 / 0';ui('power-bar').style.width=(state.residents?Math.min(100,power/(state.residents*1.2)*100):0)+'%';ui('water-bar').style.width=(state.residents?Math.min(100,water/state.residents*100):0)+'%';ui('jobs-bar').style.width=Math.min(100,state.jobs/Math.max(1,state.residents)*100)+'%';[['res',h],['com',c],['ind',i]].forEach(([n,v])=>{ui('demand-'+n).textContent=v?'Faible':'Élevée';ui(n+'-bar').style.width=Math.max(20,80-v*8)+'%';});const net=state.residents*1.2+state.jobs*.5-state.buildings.length*35;ui('balance').textContent=(net>=0?'+$ ':'−$ ')+Math.abs(Math.round(net)).toLocaleString('fr-CA');ui('date-label').textContent='PRINTEMPS · JOUR '+state.day;}
 function simulate(){if(state.paused)return;state.day++;const houses=Object.values(state.tiles).filter(t=>t.type==='residential').length,supplied=state.buildings.some(b=>b.type==='power')&&state.buildings.some(b=>b.type==='water'),growth=Math.max(0,Math.floor(houses*(supplied?0.12:0.035)));state.residents=Math.min(houses*24,state.residents+growth);state.money+=state.residents*1.2+state.jobs*.5-state.buildings.length*35-state.residents*.25;updateUI();if(state.day%5===0)notify('Jour '+state.day+' : '+state.residents+' habitants.');}
 function setTool(t){state.tool=t;routeStart=null;document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tool===t));sceneRef?.drawWorld();ui('tool-help').textContent=t==='road'?'Route : clique une fois pour le départ, puis une deuxième fois pour la destination.':'Outil sélectionné : '+t+'.';}
-function startNewGame(){Object.assign(state,freshState());routeStart=null;sceneRef.cameras.main.setZoom(1);sceneRef.cameras.main.centerOn(sceneRef.scale.width/2,sceneRef.scale.height/2);sceneRef.drawWorld();updateUI();ui('main-menu').classList.add('hidden');notify('Nouvelle ville créée.');}
+function startNewGame(){Object.assign(state,freshState());routeStart=null;sceneRef.cameras.main.setZoom(1);sceneRef.cameras.main.centerOn(sceneRef.scale.width/2,sceneRef.scale.height/2);sceneRef.drawWorld();updateUI();notify('Nouvelle ville créée.');}
 function loadGame(){const raw=localStorage.getItem('citybuilder2d-save');if(!raw){notify('Aucune sauvegarde trouvée. Crée une nouvelle partie.');return;}try{Object.assign(state,freshState(),JSON.parse(raw));routeStart=null;sceneRef.drawWorld();updateUI();ui('main-menu').classList.add('hidden');notify('Partie chargée.');}catch{notify('Sauvegarde illisible.');}}
 document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>setTool(b.dataset.tool)));
 document.querySelectorAll('.speed').forEach(b=>b.addEventListener('click',()=>{state.speed=Number(b.dataset.speed);document.querySelectorAll('.speed').forEach(x=>x.classList.toggle('active',x===b));ui('sim-status').textContent=state.paused?'SIMULATION EN PAUSE':'SIMULATION · '+state.speed+'×';}));
@@ -54,14 +55,10 @@ ui('pause').addEventListener('click',()=>{state.paused=!state.paused;ui('pause')
 ui('save').addEventListener('click',()=>{localStorage.setItem('citybuilder2d-save',JSON.stringify(state));notify('Ville sauvegardée dans ce navigateur.');});
 ui('load').addEventListener('click',loadGame);
 ui('reset').addEventListener('click',()=>{if(confirm('Recommencer une nouvelle ville ?'))startNewGame();});
-ui('menu-new').addEventListener('click',startNewGame);ui('menu-continue').addEventListener('click',loadGame);
-ui('menu-options').addEventListener('click',()=>ui('options-panel').classList.remove('hidden'));
-ui('options-close').addEventListener('click',()=>ui('options-panel').classList.add('hidden'));
-ui('menu-tutorial').addEventListener('click',()=>{tutorialStep=0;showTutorial();});
 ui('tutorial-open').addEventListener('click',()=>{tutorialStep=0;showTutorial();});
 function showTutorial(){const steps=[['Bienvenue, maire !','Ton objectif est de construire une ville, attirer des habitants et garder un budget positif.'],['Déplace-toi sur la carte','Maintiens le clic droit et déplace la souris pour faire glisser la carte. Utilise la molette pour zoomer.'],['Construis ta première route','Sélectionne Route. Clique une fois sur le point de départ, puis clique une deuxième fois sur la destination. La route relie les deux points.'],['Ajoute des zones','Construis des zones résidentielles, commerciales et industrielles à côté d’une route.'],['Installe les services','Place une centrale et un château d’eau, puis ajoute des parcs, une école et une clinique.'],['Lance la simulation','Appuie sur ▶ pour démarrer. Utilise 1×, 2× ou 4× pour accélérer. Sauvegarde régulièrement.']];const s=steps[tutorialStep];ui('tutorial-title').textContent=s[0];ui('tutorial-text').textContent=s[1];ui('tutorial-count').textContent=(tutorialStep+1)+' / '+steps.length;ui('tutorial-prev').disabled=tutorialStep===0;ui('tutorial-next').textContent=tutorialStep===steps.length-1?'Terminer':'Suivant';ui('tutorial-panel').classList.remove('hidden');}
 ui('tutorial-next').addEventListener('click',()=>{if(tutorialStep>=5){ui('tutorial-panel').classList.add('hidden');return;}tutorialStep++;showTutorial();});
 ui('tutorial-prev').addEventListener('click',()=>{tutorialStep=Math.max(0,tutorialStep-1);showTutorial();});
-window.addEventListener('keydown',e=>{if(e.target instanceof HTMLInputElement)return;const m={v:'select',r:'road',x:'bulldoze'};if(m[e.key.toLowerCase()])setTool(m[e.key.toLowerCase()]);if(e.key==='Escape'){ui('tutorial-panel').classList.add('hidden');ui('options-panel').classList.add('hidden');}});
+window.addEventListener('keydown',e=>{if(e.target instanceof HTMLInputElement)return;const m={v:'select',r:'road',x:'bulldoze'};if(m[e.key.toLowerCase()])setTool(m[e.key.toLowerCase()]);if(e.key==='Escape'){ui('tutorial-panel').classList.add('hidden');}});
 new Phaser.Game({type:Phaser.CANVAS,parent:'game-container',backgroundColor:'#35534b',scale:{mode:Phaser.Scale.RESIZE,width:'100%',height:'100%'},render:{antialias:false,pixelArt:true},scene:[CityScene]});
 setInterval(()=>{for(let n=0;n<state.speed;n++)simulate();},5000);updateUI();
