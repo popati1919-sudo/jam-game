@@ -27,36 +27,23 @@ if(!h&&!v)s.add.circle(p.x,p.y,2,0xd5d0aa).setDepth(depth+.2);
 return;
 }
 if(!t)return;
-// Zones and service buildings always use illustrated sprite artwork; never draw the old green/black placeholder rectangles.
-if(['residential','commercial','industrial'].includes(t.type)){
+const place=(key,offset=0,size=58)=>s.add.image(p.x,p.y-5+offset,key).setDisplaySize(size,size).setDepth(depth+2+offset*.01);
 if(t.type==='residential'&&!t.built){
-s.add.image(p.x,p.y-3,'city-upgrades',4).setDisplaySize(54,54).setDepth(depth+2);
-if(t.building)s.add.image(p.x+12,p.y-18,'city-upgrades',5).setDisplaySize(43,43).setDepth(depth+3);
-s.add.text(p.x,p.y+17,t.building?'CHANTIER':'À CONSTRUIRE',{fontFamily:'monospace',fontSize:'6px',color:'#fff4d6',backgroundColor:'#76502d',padding:{x:2,y:1}}).setOrigin(.5).setDepth(depth+4);
+place('foundation',0,62);
+if(t.building)place('crane',-18,58);
+s.add.text(p.x,p.y+17,t.building?'CHANTIER':'À CONSTRUIRE',{fontFamily:'monospace',fontSize:'6px',color:'#fff4d6',backgroundColor:'#76502d',padding:{x:2,y:1}}).setOrigin(.5).setDepth(depth+5);
 return;
 }
-const frame=t.type==='residential'?((x*3+y)%4):t.type==='commercial'?4:5;
-const texture=t.type==='residential'?'city-upgrades':'city-assets';
-s.add.image(p.x,p.y-5,texture,frame).setDisplaySize(54,54).setDepth(depth+2);
-return;
-}
-const sprites={
-power:{texture:'city-upgrades',frame:10},water:{texture:'city-upgrades',frame:12},
-park:{texture:'city-assets',frame:12},school:{texture:'city-assets',frame:6},
-clinic:{texture:'city-assets',frame:7},police:{texture:'city-assets',frame:8},
-fire:{texture:'city-assets',frame:9},substation:{texture:'city-upgrades',frame:11},
-pumping:{texture:'city-upgrades',frame:13},reservoir:{texture:'city-upgrades',frame:14},
-wind:{texture:'city-upgrades',frame:15}
-};
-const sprite=sprites[t.type];
-if(sprite){s.add.image(p.x,p.y-5,sprite.texture,sprite.frame).setDisplaySize(54,54).setDepth(depth+2);return;}
-// Safe visual fallback for unknown future building types: use the illustrated construction-site sprite, not a colored square.
-s.add.image(p.x,p.y-4,'city-upgrades',4).setDisplaySize(54,54).setDepth(depth+2);
-s.add.image(p.x+12,p.y-18,'city-upgrades',5).setDisplaySize(43,43).setDepth(depth+3);
+const houses=['house1','house2','house3','house4'];
+const map={residential:houses[(x*3+y)%4],commercial:'shop',industrial:'factory',power:'power',water:'tower',park:'park',school:'school',clinic:'clinic',police:'police',fire:'fire',substation:'substation',pumping:'pump',reservoir:'reservoir'};
+const sprite=map[t.type];
+if(sprite){place(sprite,0,62);return;}
+place('foundation',0,62);
+if(t.building)place('crane',-18,58);
 }
 class CityScene extends Phaser.Scene{
 constructor(){super('city');}
-preload(){this.load.spritesheet('city-assets','assets/sprites/city-assets.svg',{frameWidth:256,frameHeight:256});this.load.spritesheet('city-upgrades','assets/sprites/city-upgrades.svg',{frameWidth:256,frameHeight:256});}
+preload(){this.load.image('house1','assets/sprites/buildings/house1.svg');this.load.image('house2','assets/sprites/buildings/house2.svg');this.load.image('house3','assets/sprites/buildings/house3.svg');this.load.image('house4','assets/sprites/buildings/house4.svg');this.load.image('shop','assets/sprites/buildings/shop.svg');this.load.image('factory','assets/sprites/buildings/factory.svg');this.load.image('school','assets/sprites/buildings/school.svg');this.load.image('clinic','assets/sprites/buildings/clinic.svg');this.load.image('power','assets/sprites/buildings/power.svg');this.load.image('tower','assets/sprites/buildings/tower.svg');this.load.image('park','assets/sprites/buildings/park.svg');this.load.image('substation','assets/sprites/buildings/substation.svg');this.load.image('pump','assets/sprites/buildings/pump.svg');this.load.image('foundation','assets/sprites/buildings/foundation.svg');this.load.image('crane','assets/sprites/buildings/crane.svg');this.load.image('police','assets/sprites/buildings/police.svg');this.load.image('fire','assets/sprites/buildings/fire.svg');this.load.image('reservoir','assets/sprites/buildings/reservoir.svg');}
 create(){sceneRef=this;this.vehicles=[];this.constructions=[];this.vehicleClock=0;this.cameras.main.setBackgroundColor('#35534b');this.cameras.main.setBounds(-4000,-4000,8000,8000);this.input.mouse.disableContextMenu();this.drawWorld();const entryView=iso(9,12);this.cameras.main.centerOn(entryView.x,entryView.y);
 this.input.on('pointerdown',p=>{if(p.button===2||p.middleButton){this.dragPointer={x:p.x,y:p.y};return;}this.place(p);});
 this.input.on('pointermove',p=>{if(this.dragPointer&&p.isDown){const cam=this.cameras.main;cam.scrollX-=(p.x-this.dragPointer.x)/cam.zoom;cam.scrollY-=(p.y-this.dragPointer.y)/cam.zoom;this.dragPointer={x:p.x,y:p.y};}});
