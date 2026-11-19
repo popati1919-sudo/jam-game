@@ -7,7 +7,7 @@ const key=(x,y)=>x+','+y,get=(x,y)=>state.tiles[key(x,y)],ui=id=>document.getEle
 let sceneRef,toastTimer;
 function notify(msg){const el=ui('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2200);ui('city-news').textContent=msg;}
 function iso(x,y){return{x:(x-y)*TILE_W/2+sceneRef.scale.width/2,y:(x+y)*TILE_H/2+65};}
-function gridAt(px,py){const xx=px-sceneRef.scale.width/2,yy=py-65;return{x:Math.floor((xx/TILE_W+yy/TILE_H)-GRID/2),y:Math.floor((yy/TILE_H-xx/TILE_W)-GRID/2)};}
+function gridAt(px,py){const xx=px-sceneRef.scale.width/2,yy=py-65;return{x:Math.floor((xx/TILE_W+yy/TILE_H)/2),y:Math.floor((yy/TILE_H-xx/TILE_W)/2)};}
 function roadNear(x,y){return[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>get(x+dx,y+dy)?.type==='road');}
 function drawTile(s,x,y,t){const p=iso(x,y);let c=(x+y)%2?COLORS.grass:COLORS.grass2;if(t?.type==='road')c=COLORS.road;if(t?.type==='residential')c=COLORS.residential;if(t?.type==='commercial')c=COLORS.commercial;if(t?.type==='industrial')c=COLORS.industrial;
 s.add.polygon(p.x,p.y,[0,-TILE_H/2,TILE_W/2,0,0,TILE_H/2,-TILE_W/2,0],c).setStrokeStyle(1,0x314c3b,.55).setDepth(x+y);
