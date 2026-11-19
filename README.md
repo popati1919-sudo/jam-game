@@ -38,3 +38,6 @@ npm run preview
 
 ## Crédits du jam
 Le cœur du jeu est développé pour le City Jam. Ajouter les crédits des ressources externes (graphismes, sons, polices) avant la soumission.
+
+## Guide du joueur
+Consultez [docs/TUTORIEL.md](docs/TUTORIEL.md) pour le guide pas à pas : première route, zonage, services, simulation, sauvegarde et dépannage.
