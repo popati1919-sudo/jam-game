@@ -73,7 +73,7 @@ ui('menu-new').addEventListener('click',()=>{ui('main-menu').classList.add('hidd
 ui('menu-continue').addEventListener('click',()=>{ui('main-menu').classList.add('hidden');loadGame();tutorialStep=0;showTutorial();});
 document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>setTool(b.dataset.tool)));
 document.querySelectorAll('.speed').forEach(b=>b.addEventListener('click',()=>{state.speed=Number(b.dataset.speed);document.querySelectorAll('.speed').forEach(x=>x.classList.toggle('active',x===b));ui('sim-status').textContent=state.paused?'SIMULATION EN PAUSE':'SIMULATION · '+state.speed+'×';}));
-ui('pause').addEventListener('click',()=>{state.paused=!state.paused;if(!state.paused)tutorialAction('simulation');ui('pause').textContent=state.paused?'▶':'Ⅱ';ui('sim-status').textContent=state.paused?'SIMULATION EN PAUSE':'SIMULATION · '+state.speed+'×';});
+ui('pause').addEventListener('click',()=>{state.paused=!state.paused;if(!state.paused)tutorialAction('simulation');ui('pause').textContent=state.paused?'▶ JOUER':'Ⅱ PAUSE';ui('sim-status').textContent=state.paused?'SIMULATION EN PAUSE':'SIMULATION · '+state.speed+'×';});
 ui('save').addEventListener('click',()=>{localStorage.setItem('citybuilder2d-save',JSON.stringify(state));notify('Ville sauvegardée dans ce navigateur.');});
 ui('load').addEventListener('click',loadGame);
 ui('reset').addEventListener('click',()=>{if(confirm('Recommencer une nouvelle ville ?'))startNewGame();});
