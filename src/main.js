@@ -26,8 +26,8 @@ function drawTile(s,x,y,t){
 const p=iso(x,y),depth=y*GRID+x;
 const grass=riverAt(x,y)?0x75aeb0:((x*17+y*31)%5===0?0x71996a:((x+y)%2?0x729b6b:0x789f70));
 if(t?.type==='road'){
-s.add.rectangle(p.x,p.y,TILE_W+1,TILE_H+1,0x424e53).setDepth(depth);
-s.add.rectangle(p.x,p.y,TILE_W-2,TILE_H-2,0x59666b).setDepth(depth+.1);
+s.add.rectangle(p.x,p.y,TILE_W+1,TILE_H+1,0x080a09).setDepth(depth);
+s.add.rectangle(p.x,p.y,TILE_W-3,TILE_H-3,0x59666b).setDepth(depth+.1);
 const h=get(x-1,y)?.type==='road'||get(x+1,y)?.type==='road',v=get(x,y-1)?.type==='road'||get(x,y+1)?.type==='road';
 const junction=h&&v;
 if(h||!v){
