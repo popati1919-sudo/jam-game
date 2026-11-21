@@ -177,39 +177,6 @@ footer b{color:#637b62}
 
 
 
-/* Dark theme — cohesive charcoal city-builder interface */
-:root{
-  color-scheme:dark;
-  --ink:#e8ece8;
-  --muted:#9ba69f;
-  --paper:#101412;
-  --panel:#191f1b;
-  --panel-raised:#202823;
-  --line:#303a33;
-  --accent:#a8c77a;
-}
-html,body,#app{background:#0d110f;color:#e8ece8}
-body{color:#e8ece8}
-.topbar,.sidebar,.panel,.tool-section,.city-panel,.stats-panel,footer{
-  background:#171d19!important;
-  color:#e8ece8!important;
-  border-color:#303a33!important;
-}
-.topbar{box-shadow:0 2px 12px #0008}
-.layout{background:#0d110f}
-button,.tool,.menu-button,.metric,.stat,.card{
-  color:#e8ece8;
-}
-.tool{background:#202823!important;border-color:#39453d!important}
-.tool:hover,.tool.active{background:#304034!important;border-color:#91b66b!important}
-input,select,textarea{background:#111713!important;color:#edf2ec!important;border-color:#3a463e!important}
-.metric,.stat{background:#1c241f!important;border-color:#303a33!important}
-.metric strong,.stat strong{color:#d9e8c9}
-footer{color:#9ba69f!important}
-#main-menu{background:rgba(5,8,6,.96)!important;backdrop-filter:blur(8px)}
-#main-menu .menu-card{background:#171e19!important;border:1px solid #3b493e!important;color:#edf2ec!important;box-shadow:0 20px 70px #000c}
-#main-menu h1,#main-menu h2{color:#e9eee7}
-#main-menu .menu-button{background:#242e27!important;border-color:#445247!important;color:#e9eee7!important}
-#main-menu .menu-primary{background:#a8c77a!important;color:#172016!important}
-#main-menu .menu-foot{color:#9ba69f!important}
-.city-name h2{color:#e8ece8}
+
+/* Black outlines around road tiles and building sprites */
+.tool,.metric{color:inherit}
