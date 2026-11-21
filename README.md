@@ -1,9 +1,9 @@
-# CityBuilder2D — City Jam
+# Vice District — Open World
 
-Prototype de city-builder isométrique en français, créé avec Phaser 3 et Vite pour le thème **LA VIE** du City Jam.
+Prototype d'aventure urbaine en monde ouvert développé avec Phaser 3 et Vite.
 
 ## Jouer
-Après avoir activé GitHub Pages avec la source **GitHub Actions** dans Settings → Pages, le jeu sera publié ici :
+Après le déploiement GitHub Pages :
 https://popati1919-sudo.github.io/jam-game/
 
 ## Lancer localement
@@ -19,25 +19,23 @@ npm run preview
 ```
 
 ## Fonctionnalités du prototype
-- Carte isométrique et interface de gestion responsive
-- Placement de routes, zonage résidentiel, commercial et industriel
-- Démolition avec remboursement partiel
-- Centrale électrique, château d'eau, parc, école et clinique
-- Trésorerie, population, emplois, bonheur et indicateurs de services
-- Simulation journalière, pause et vitesses 1× / 2× / 4×
-- Sauvegarde et chargement dans le navigateur
-- Compilation GitHub Actions et déploiement GitHub Pages
+- Carte ouverte de 3 200 × 2 400 avec cinq quartiers, plage, lac et port industriel
+- Caméra qui suit le personnage et exploration à pied
+- Véhicules conduisibles, trafic ambiant et piétons
+- Missions scénarisées, objectifs et récompenses
+- Argent, santé et réputation
+- Niveau de recherche, patrouilles et poursuites policières
+- Interactions avec les personnages et commerces
+- Braquage de commerce avec témoins et réaction policière
+- Mini-carte, interface adaptative et commandes clavier / tactiles
 
 ## Commandes
-- Sélection : inspecter une case
-- Route : tracer les routes
-- Zonage : résidentiel, commercial, industriel
-- Services : énergie, eau, parc, école, clinique
-- Démolir : supprimer une case
-- Clavier : **V** sélectionner, **R** route, **X** démolir
+- **ZQSD / WASD** ou flèches : déplacement
+- **Maj** : courir
+- **E** : entrer ou sortir d'un véhicule
+- **F** : interagir / klaxonner
+- **Espace** : action
+- **M** : afficher/masquer la carte
 
-## Crédits du jam
-Le cœur du jeu est développé pour le City Jam. Ajouter les crédits des ressources externes (graphismes, sons, polices) avant la soumission.
-
-## Guide du joueur
-Consultez [docs/TUTORIEL.md](docs/TUTORIEL.md) pour le guide pas à pas : première route, zonage, services, simulation, sauvegarde et dépannage.
+## Direction
+Vice District est une création originale inspirée du genre action-aventure en monde ouvert. Les personnages, quartiers et éléments narratifs sont propres au projet.
