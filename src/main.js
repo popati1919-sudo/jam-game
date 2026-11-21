@@ -79,7 +79,6 @@ spawnPolice(dt){if(this.police.length<Math.min(6,state.wanted+1)&&Math.random()<
 clearPolice(){this.police.forEach(p=>p.sprite.destroy());this.police=[];}
 renderMiniMap(){const c=$('minimap'),ctx=c.getContext('2d');ctx.fillStyle='#6e906e';ctx.fillRect(0,0,180,180);ctx.fillStyle='#267b91';ctx.fillRect(0,0,180,12);ctx.fillStyle='#404849';roads.forEach(r=>ctx.fillRect(r.x/WORLD.w*180,r.y/WORLD.h*180,Math.max(3,r.w/WORLD.w*180),Math.max(3,r.h/WORLD.h*180)));ctx.fillStyle='#e9b34c';ctx.beginPath();ctx.arc(this.player.x/WORLD.w*180,this.player.y/WORLD.h*180,3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e15d55';this.police.forEach(p=>{ctx.fillRect(p.sprite.x/WORLD.w*180-2,p.sprite.y/WORLD.h*180-2,4,4);});}
 }
-}
 const game=new Phaser.Game({type:Phaser.AUTO,parent:'game-container',backgroundColor:'#77966f',scale:{mode:Phaser.Scale.RESIZE,width:'100%',height:'100%'},render:{antialias:true,pixelArt:false},scene:[OpenWorld],physics:{default:'arcade',arcade:{debug:false}}});
 $('start-game').addEventListener('click',()=>{state.gameStarted=true;state.paused=false;$('start-screen').style.display='none';game.scene.start('world');$('status').textContent='LIBERTÉ TOTALE';notify('Bienvenue à Vice District. Bonne chance !');});
 window.addEventListener('keydown',e=>{if(e.key===' '||e.key.startsWith('Arrow'))e.preventDefault();});
