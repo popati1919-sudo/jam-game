@@ -34,23 +34,80 @@ this.physics.world.pause();
 this.renderMiniMap();
 }
 drawMap(){
-const g=this.add.graphics();g.fillStyle(0x86a27d).fillRect(0,0,WORLD.w,WORLD.h);
-// coast, beach and sea
-g.fillStyle(0x267b91).fillRect(0,0,WORLD.w,150);g.fillStyle(0xd8c28e).fillRect(0,150,WORLD.w,75);g.fillStyle(0x4e8790,.4).fillRect(0,0,WORLD.w,145);
-districts.forEach(d=>{g.fillStyle(d.color,.17).fillRect(d.x,d.y,d.w,d.h);});
-for(let y=0;y<WORLD.h;y+=TILE)for(let x=0;x<WORLD.w;x+=TILE){g.fillStyle(((x/TILE+y/TILE)%2)?0x91ad83:0x87a17b,.35).fillRect(x,y,TILE,TILE);}
-roads.forEach(r=>{g.fillStyle(0x3e4647).fillRect(r.x,r.y,r.w,r.h);g.fillStyle(0x59615d).fillRect(r.x,r.y,r.w,r.h);g.lineStyle(2,0xd9c88d,.7);if(r.w>r.h){for(let x=r.x+20;x<r.x+r.w;x+=50)g.lineBetween(x,r.y+r.h/2,x+24,r.y+r.h/2);}else{for(let y=r.y+20;y<r.y+r.h;y+=50)g.lineBetween(r.x+r.w/2,y,r.x+r.w/2,y+24);}});
-const rand=(n)=>{let x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x);};
-for(let i=0;i<280;i++){let x=rand(i+1)*WORLD.w,y=250+rand(i+999)*2150;if(roads.some(r=>x>r.x-30&&x<r.x+r.w+30&&y>r.y-30&&y<r.y+r.h+30))continue;let park=rand(i+3000)>.84;g.fillStyle(park?0x477e4d:0x6f8b68,.9);g.fillCircle(x,y,park?25:11+rand(i+4000)*8);g.fillStyle(0x9ba77a,.65);g.fillCircle(x-4,y-5,park?10:4);}
+const g=this.add.graphics();
+const rand=(n)=>{const v=Math.sin(n*127.1+311.7)*43758.5453;return v-Math.floor(v);};
+g.fillStyle(0x899b78).fillRect(0,0,WORLD.w,WORLD.h);
+g.fillStyle(0x1f7187).fillRect(0,0,WORLD.w,145);
+for(let i=0;i<70;i++){const x=rand(i+900)*WORLD.w,y=rand(i+1200)*125;g.lineStyle(2,0x70a8ad,.18);g.beginPath();g.arc(x,y,12+rand(i+1800)*45,0,Math.PI*1.6,false);g.strokePath();}
+g.fillStyle(0xd9c69a).fillRect(0,140,WORLD.w,95);
+g.fillStyle(0xf0dcb0,.7).fillRect(0,148,WORLD.w,8);
+g.fillStyle(0x9baf85,.25).fillRect(0,235,WORLD.w,WORLD.h-235);
+districts.forEach((d,i)=>{g.fillStyle(d.color,.13).fillRect(d.x,d.y,d.w,d.h);});
+for(let i=0;i<240;i++){
+ const x=rand(i+40)*WORLD.w,y=260+rand(i+540)*2100;
+ if(roads.some(r=>x>r.x-42&&x<r.x+r.w+42&&y>r.y-42&&y<r.y+r.h+42))continue;
+ const park=rand(i+850)>.78;
+ if(park){g.fillStyle(0x527b50,.6).fillRoundedRect(x-35,y-27,70,54,12);g.lineStyle(2,0x9aaf78,.3).strokeRoundedRect(x-35,y-27,70,54,12);}
+ for(let t=0;t<(park?5:1);t++){
+  const tx=x+(rand(i*7+t+10)-.5)*(park?55:12),ty=y+(rand(i*9+t+20)-.5)*(park?40:12);
+  g.fillStyle(0x253b2d,.22).fillEllipse(tx+5,ty+8,25,15);
+  g.fillStyle([0x416b45,0x4d7548,0x587d4d][(i+t)%3]).fillCircle(tx,ty,park?9:13);
+  g.fillStyle(0x8ca66a,.35).fillCircle(tx-4,ty-5,park?4:6);
+ }
+}
 this.buildings=[];
-for(let i=0;i<160;i++){let x=260+rand(i+51)*2800,y=260+rand(i+88)*2050;if(roads.some(r=>x>r.x-90&&x<r.x+r.w+90&&y>r.y-90&&y<r.y+r.h+90))continue;let w=35+rand(i+120)*65,h=35+rand(i+240)*65,col=[0xb8a88a,0xc1b9a4,0x8e9b91,0xd0b98e,0x9baba5][i%5];g.fillStyle(0x35413a,.35).fillRect(x+7,y+9,w,h);g.fillStyle(col).fillRect(x,y,w,h);g.fillStyle(0xe2d9c5,.65).fillRect(x+5,y+5,w-10,6);g.lineStyle(2,0x39423b,.55).strokeRect(x,y,w,h);for(let wx=x+10;wx<x+w-5;wx+=17)g.fillStyle(0x536c70).fillRect(wx,y+17,8,10);this.buildings.push({x:x+w/2,y:y+h/2,w,h});}
-this.add.text(80,265,'VICE BEACH',{font:'bold 36px Arial',color:'#f6edcf',stroke:'#253b36',strokeThickness:5}).setDepth(2);
-this.add.text(1250,240,'CENTRO',{font:'bold 38px Arial',color:'#f6edcf',stroke:'#253b36',strokeThickness:5}).setDepth(2);
-this.add.text(90,930,'LITTLE HAVANA',{font:'bold 32px Arial',color:'#f6edcf',stroke:'#253b36',strokeThickness:5}).setDepth(2);
-this.add.text(2200,1280,'PORT INDUSTRIEL',{font:'bold 32px Arial',color:'#f6edcf',stroke:'#253b36',strokeThickness:5}).setDepth(2);
-this.add.text(1160,1810,'PALM HEIGHTS',{font:'bold 30px Arial',color:'#f6edcf',stroke:'#253b36',strokeThickness:5}).setDepth(2);
-this.add.rectangle(1550,400,460,230,0x327f91,.65).setStrokeStyle(5,0xc8d0ae,.8);
-this.add.text(1450,380,'LAC AZUR',{font:'bold 16px Arial',color:'#eff3d9'}).setDepth(3);
+for(let i=0;i<190;i++){
+ let x=250+rand(i+51)*2850,y=265+rand(i+88)*2070;
+ if(roads.some(r=>x>r.x-105&&x<r.x+r.w+105&&y>r.y-105&&y<r.y+r.h+105))continue;
+ const w=42+rand(i+120)*72,h=42+rand(i+240)*72;
+ const palette=[0xc8b99c,0xb9b8a8,0x9eaaa1,0xd2bd98,0xa7b4ad,0xb28f76];
+ const col=palette[i%palette.length];
+ g.fillStyle(0x17251f,.23).fillRoundedRect(x+9,y+12,w,h,4);
+ g.fillStyle(0x59675d,.5).fillRoundedRect(x-4,y-4,w+8,h+8,5);
+ g.fillStyle(col).fillRoundedRect(x,y,w,h,4);
+ g.fillStyle(0xe6d9bd,.72).fillRoundedRect(x+5,y+5,w-10,7,2);
+ g.fillStyle(0x777d70,.28).fillRect(x+5,y+h-9,w-10,4);
+ g.lineStyle(1,0x38463d,.55).strokeRoundedRect(x,y,w,h,4);
+ for(let wx=x+10;wx<x+w-8;wx+=16){
+  g.fillStyle(0x49666a,.9).fillRect(wx,y+18,8,9);
+  g.lineStyle(1,0xe4d9bf,.6).lineBetween(wx+4,y+18,wx+4,y+27);
+ }
+ if(w>76&&h>76){g.fillStyle(0x788b78,.75).fillRoundedRect(x+w*.35,y+h*.35,w*.3,h*.3,3);g.fillStyle(0x9eaa8a,.5).fillRect(x+w*.4,y+h*.4,w*.2,h*.2);}
+ this.buildings.push({x:x+w/2,y:y+h/2,w,h});
+}
+roads.forEach(r=>{
+ const horizontal=r.w>r.h;
+ g.fillStyle(0x6e7867,.35).fillRect(r.x-5,r.y-5,r.w+10,r.h+10);
+ g.fillStyle(0xc0bba4).fillRect(r.x-5,r.y-5,r.w+10,r.h+10);
+ g.fillStyle(0x777e78).fillRect(r.x,r.y,r.w,r.h);
+ g.fillStyle(0x41494a).fillRect(r.x+5,r.y+5,r.w-10,r.h-10);
+ g.lineStyle(2,0xe1d2a1,.62);
+ if(horizontal){
+  for(let x=r.x+20;x<r.x+r.w;x+=54)g.lineBetween(x,r.y+r.h/2,x+27,r.y+r.h/2);
+  g.lineStyle(2,0xbac0b2,.5);g.lineBetween(r.x,r.y+5,r.x+r.w,r.y+5);g.lineBetween(r.x,r.y+r.h-5,r.x+r.w,r.y+r.h-5);
+  for(let x=100;x<WORLD.w;x+=600){g.fillStyle(0xe9e5d6,.65);for(let k=0;k<5;k++)g.fillRect(x+k*8,r.y+10,4,13);for(let k=0;k<5;k++)g.fillRect(x+k*8,r.y+r.h-23,4,13);}
+ }else{
+  for(let y=r.y+20;y<r.y+r.h;y+=54)g.lineBetween(r.x+r.w/2,y,r.x+r.w/2,y+27);
+  g.lineStyle(2,0xbac0b2,.5);g.lineBetween(r.x+5,r.y,r.x+5,r.y+r.h);g.lineBetween(r.x+r.w-5,r.y,r.x+r.w-5,r.y+r.h);
+ }
+});
+for(let i=0;i<55;i++){
+ const x=rand(i+3300)*WORLD.w,y=280+rand(i+4400)*2050;
+ if(roads.some(r=>x>r.x-8&&x<r.x+r.w+8&&y>r.y-8&&y<r.y+r.h+8))continue;
+ g.fillStyle(0x26372c,.2).fillEllipse(x+3,y+7,24,13);
+ g.fillStyle(0x557c51).fillCircle(x,y,10+rand(i+5500)*5);
+ g.fillStyle(0x9eb477,.35).fillCircle(x-3,y-4,5);
+}
+this.add.text(75,270,'VICE BEACH',{font:'800 34px Arial',color:'#fff1d0',stroke:'#293c38',strokeThickness:6}).setDepth(2);
+this.add.text(1260,255,'CENTRO',{font:'800 36px Arial',color:'#fff1d0',stroke:'#293c38',strokeThickness:6}).setDepth(2);
+this.add.text(85,925,'LITTLE HAVANA',{font:'800 30px Arial',color:'#fff1d0',stroke:'#293c38',strokeThickness:6}).setDepth(2);
+this.add.text(2180,1270,'PORT INDUSTRIEL',{font:'800 30px Arial',color:'#fff1d0',stroke:'#293c38',strokeThickness:6}).setDepth(2);
+this.add.text(1160,1810,'PALM HEIGHTS',{font:'800 29px Arial',color:'#fff1d0',stroke:'#293c38',strokeThickness:6}).setDepth(2);
+g.fillStyle(0x267b91,.9).fillRoundedRect(1320,285,470,245,28);
+g.lineStyle(8,0xd5c79e,.85).strokeRoundedRect(1320,285,470,245,28);
+g.lineStyle(3,0x7cb4b2,.45);
+for(let i=0;i<18;i++)g.lineBetween(1340,305+i*11,1765,305+i*11);
+this.add.text(1450,390,'LAC AZUR',{font:'800 18px Arial',color:'#eff3d9',stroke:'#1e5260',strokeThickness:3}).setDepth(3);
 }
 createCars(){const palette=[0xc94f42,0x2f6d9c,0xd7c18b,0x3b4143,0xd9d9ce,0x4c7a56,0x9e6d9e];for(let i=0;i<24;i++){let r=roads[i%roads.length],horizontal=r.w>r.h,x=horizontal?120+((i*137)%2900):r.x+50,y=horizontal?r.y+25+((i%2)*48):120+((i*113)%2150);let c=this.add.container(x,y);let shadow=this.add.ellipse(0,5,53,27,0x000000,.25);let base=this.add.rectangle(0,0,48,23,palette[i%palette.length]).setStrokeStyle(2,0x222c2a);let roof=this.add.rectangle(-2,0,22,17,0x9db8b8).setStrokeStyle(1,0x273b3b);let lights=this.add.rectangle(22,0,4,17,0xe9d6a2);c.add([shadow,base,roof,lights]);c.setDepth(2000+i);this.cars.push({sprite:c,x,y,dx:horizontal?1.1:0,dy:horizontal?0:1.1,ai:true,occupied:false});}}
 createPedestrians(){for(let i=0;i<36;i++){let x=300+(i*79)%2600,y=300+(i*131)%1900;if(roads.some(r=>x>r.x-25&&x<r.x+r.w+25&&y>r.y-25&&y<r.y+r.h+25))continue;let p=this.add.container(x,y);p.add([this.add.ellipse(0,9,14,6,0x000000,.25),this.add.circle(0,0,6,[0xd0a078,0x7d9eaa,0xb48a6e,0x596f5e][i%4]),this.add.rectangle(0,9,9,13,[0xd1a24c,0x536c8b,0x9b665b,0x52634f][i%4])]);p.setDepth(3000+i);this.peds.push({sprite:p,origin:{x,y},phase:i*.8});}}
