@@ -31,12 +31,12 @@ s.add.rectangle(p.x,p.y,TILE_W-2,TILE_H-2,0x59666b).setDepth(depth+.1);
 const h=get(x-1,y)?.type==='road'||get(x+1,y)?.type==='road',v=get(x,y-1)?.type==='road'||get(x,y+1)?.type==='road';
 const junction=h&&v;
 if(h||!v){
-s.add.rectangle(p.x,p.y-TILE_H/2+2,TILE_W,1,0x9ba7a0,.65).setDepth(depth+.2);
-s.add.rectangle(p.x,p.y+TILE_H/2-2,TILE_W,1,0x9ba7a0,.65).setDepth(depth+.2);
+s.add.rectangle(p.x,p.y-TILE_H/2+2,TILE_W,1,0x46534e,.42).setDepth(depth+.2);
+s.add.rectangle(p.x,p.y+TILE_H/2-2,TILE_W,1,0x46534e,.42).setDepth(depth+.2);
 }
 if(v||!h){
-s.add.rectangle(p.x-TILE_W/2+2,p.y,1,TILE_H,0x9ba7a0,.65).setDepth(depth+.2);
-s.add.rectangle(p.x+TILE_W/2-2,p.y,1,TILE_H,0x9ba7a0,.65).setDepth(depth+.2);
+s.add.rectangle(p.x-TILE_W/2+2,p.y,1,TILE_H,0x46534e,.42).setDepth(depth+.2);
+s.add.rectangle(p.x+TILE_W/2-2,p.y,1,TILE_H,0x46534e,.42).setDepth(depth+.2);
 }
 if(h&&!junction)s.add.rectangle(p.x,p.y,10,1.5,0xe8d78a,.9).setDepth(depth+.3);
 if(v&&!junction)s.add.rectangle(p.x,p.y,1.5,10,0xe8d78a,.9).setDepth(depth+.3);
