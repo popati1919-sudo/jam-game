@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f5f1e6">
-  <meta name="description" content="Fais refleurir un quartier, un toit à la fois. Un jeu de puzzle en pixel art pour City Jam 2026.">
-  <title>Toits en fleurs — City Jam</title>
+  <meta name="description" content="Bring five neighborhoods back to life, one rooftop garden at a time. A pixel art puzzle game for City Jam 2026.">
+  <title>Rooftops in Bloom — City Jam</title>
   <link rel="icon" type="image/png" href="art/logo.png">
   <link rel="stylesheet" href="style.css">
   <script defer src="puzzles.js"></script>
@@ -15,90 +15,90 @@
 <body>
   <header class="page-head">
     <div class="head-inner">
-      <div class="brand"><img src="art/logo.png" alt="" width="46" height="47"><span>Toits en fleurs</span></div>
-      <nav aria-label="Options de jeu">
-        <button class="utility" id="help" type="button"><i class="ico book"></i><span>Règles du jeu</span></button>
-        <button class="utility" id="sound" type="button" aria-pressed="false"><i class="ico audio"></i><span id="sound-label">Son coupé</span></button>
+      <div class="brand"><img src="art/logo.png" alt="" width="46" height="47"><span>Rooftops in Bloom</span></div>
+      <nav aria-label="Game options">
+        <button class="utility" id="help" type="button"><i class="ico book"></i><span>How to play</span></button>
+        <button class="utility" id="sound" type="button" aria-pressed="false"><i class="ico audio"></i><span id="sound-label">Sound off</span></button>
       </nav>
     </div>
   </header>
   <main>
     <div class="level-head">
       <div>
-        <div class="eyebrow heading-tag"><span class="level-marker" aria-hidden="true"></span>Quartier <span id="level-num">01</span><span class="level-outof">/ 05</span></div>
-        <h1 id="level-title">Le square des Lilas</h1>
+        <div class="eyebrow heading-tag"><span class="level-marker" aria-hidden="true"></span>Neighborhood <span id="level-num">01</span><span class="level-outof">/ 05</span></div>
+        <h1 id="level-title">Lilac Square</h1>
       </div>
-      <button type="button" id="level-menu" class="border-button"><i class="ico map"></i>Les quartiers</button>
+      <button type="button" id="level-menu" class="border-button"><i class="ico map"></i>Neighborhoods</button>
     </div>
     <div class="game-layout">
-      <section class="board-frame" aria-label="Carte du quartier">
+      <section class="board-frame" aria-label="Neighborhood map">
         <div class="canvas-wrap">
-          <canvas id="board" width="540" height="360" tabindex="0" role="application" aria-label="Carte des toits du quartier" aria-describedby="board-a11y">Ce jeu nécessite un navigateur compatible avec Canvas.</canvas>
-          <span id="board-a11y" class="sr">Choisis un toit avec les flèches ou sa lettre, puis appuie sur Entrée pour y poser un arroseur.</span>
+          <canvas id="board" width="540" height="360" tabindex="0" role="application" aria-label="Map of the neighborhood rooftops" aria-describedby="board-a11y">This game needs a browser that supports Canvas.</canvas>
+          <span id="board-a11y" class="sr">Use the arrow keys or a roof’s letter to select it, then press Enter to place a sprinkler.</span>
         </div>
         <div class="board-actions">
-          <p class="board-message"><i class="ico cursor"></i><span id="board-note" aria-live="polite">Sélectionne un toit sur la carte.</span></p>
-          <button class="primary" type="button" id="plant" disabled><i class="ico drop"></i>Poser l’arroseur</button>
+          <p class="board-message"><i class="ico cursor"></i><span id="board-note" aria-live="polite">Select a roof on the map.</span></p>
+          <button class="primary" type="button" id="plant" disabled><i class="ico drop"></i>Place sprinkler</button>
         </div>
       </section>
-      <aside class="sidebar" aria-label="Tableau de jardinage">
+      <aside class="sidebar" aria-label="Garden dashboard">
         <section class="goal-card">
-          <div class="eyebrow"><i class="ico sprout"></i>Objectif</div>
-          <h2>Fleuris tous<br> les toits.</h2>
-          <p>Un arroseur fait fleurir son toit et ses voisins directs.</p>
+          <div class="eyebrow"><i class="ico sprout"></i>Goal</div>
+          <h2>Make every<br> roof bloom.</h2>
+          <p>A sprinkler waters its own roof and the roofs directly beside it.</p>
           <div class="growth">
-            <div class="count-line"><span>Toits fleuris</span><span class="fraction"><b id="water-count">0</b> / <span id="water-total">6</span></span></div>
+            <div class="count-line"><span>Roofs in bloom</span><span class="fraction"><b id="water-count">0</b> / <span id="water-total">6</span></span></div>
             <div class="growth-track"><div id="growth-bar"></div></div>
           </div>
         </section>
         <section class="stock-card">
-          <div class="eyebrow">En réserve</div>
+          <div class="eyebrow">In reserve</div>
           <div class="stock-row">
-            <div><div class="stock-number"><span id="reserve">3</span><span class="stock-total"> / <span id="reserve-total">3</span></span></div><h2>Arroseurs</h2></div>
+            <div><div class="stock-number"><span id="reserve">3</span><span class="stock-total"> / <span id="reserve-total">3</span></span></div><h2>Sprinklers</h2></div>
             <img src="art/can.png" alt="" width="89" height="61">
           </div>
         </section>
         <div class="history">
-          <button type="button" id="undo" disabled><i class="ico undo"></i>Annuler le coup</button>
-          <button type="button" id="restart"><i class="ico reset"></i>Recommencer</button>
+          <button type="button" id="undo" disabled><i class="ico undo"></i>Undo move</button>
+          <button type="button" id="restart"><i class="ico reset"></i>Start over</button>
         </div>
       </aside>
     </div>
-    <footer><span class="foot-location"><i class="ico sun"></i><span id="district-name">Les Faubourgs</span></span><span><a href="https://itch.io/jam/cityjam" target="_blank" rel="noopener">City Jam 2026</a><span class="foot-dot">·</span><button class="text-button" type="button" id="credits">Crédits</button></span></footer>
+    <footer><span class="foot-location"><i class="ico sun"></i><span id="district-name">West End</span></span><span class="foot-links"><span class="desktop-download"><a id="windows-download" href="https://github.com/popati1919-sudo/jam-game/releases/download/rooftops-in-bloom-v1.0.0/Rooftops-in-Bloom-Windows-x64.exe" target="_blank" rel="noopener">Download for Windows</a><span class="foot-dot">·</span></span><a href="https://itch.io/jam/cityjam" target="_blank" rel="noopener">City Jam 2026</a><span class="foot-dot">·</span><button class="text-button" type="button" id="credits">Credits</button></span></footer>
   </main>
   <dialog id="help-dialog" aria-labelledby="help-title">
-    <div class="dialog-inner"><button class="dismiss" data-close aria-label="Fermer"><i class="ico close"></i></button>
-      <div class="eyebrow"><i class="ico book"></i>Règles du jeu</div>
-      <h2 id="help-title">De toit en toit</h2>
+    <div class="dialog-inner"><button class="dismiss" data-close aria-label="Close"><i class="ico close"></i></button>
+      <div class="eyebrow"><i class="ico book"></i>How to play</div>
+      <h2 id="help-title">From roof to roof</h2>
       <div class="how-grid" aria-hidden="true"><b></b><b>✿</b><b></b><b>✿</b><b>✦</b><b>✿</b><b></b><b>✿</b><b></b></div>
-      <p>Fais fleurir tous les toits avant d’épuiser tes arroseurs. Chaque arroseur atteint son propre toit et les toits juste à côté, dans les quatre directions.</p>
-      <p>Sélectionne une lettre sur la carte pour voir sa portée. Appuie sur <strong>Poser l’arroseur</strong> ou sélectionne le même toit une seconde fois pour arroser. Tu peux équiper un toit déjà fleuri.</p>
-      <p class="key-tip">Au clavier, place le focus sur la carte. Les flèches ou les lettres choisissent un toit. <kbd>Entrée</kbd> pose l’arroseur.</p>
-      <button class="primary" data-close>J’ai compris</button>
+      <p>Make every roof bloom before you run out of sprinklers. A sprinkler waters its own roof and any roof one space north, south, east or west.</p>
+      <p>Select a roof’s letter to preview the roofs it will water. Choose <strong>Place sprinkler</strong> or select the same roof again to place it there. You can place a sprinkler on a roof that’s already in bloom.</p>
+      <p class="key-tip">To play with a keyboard, focus the map. Choose a roof with the arrow keys or its letter. Press <kbd>Enter</kbd> to place a sprinkler.</p>
+      <button class="primary" data-close>Got it</button>
     </div>
   </dialog>
   <dialog id="map-dialog" aria-labelledby="map-title">
-    <div class="dialog-inner"><button class="dismiss" data-close aria-label="Fermer"><i class="ico close"></i></button>
-      <div class="eyebrow"><i class="ico map"></i>Carte de la ville</div><h2 id="map-title">Les quartiers</h2>
+    <div class="dialog-inner"><button class="dismiss" data-close aria-label="Close"><i class="ico close"></i></button>
+      <div class="eyebrow"><i class="ico map"></i>City map</div><h2 id="map-title">Neighborhoods</h2>
       <div id="level-options" class="level-options"></div>
     </div>
   </dialog>
   <dialog id="result-dialog" aria-labelledby="result-title">
-    <div class="dialog-inner result-inner"><button class="dismiss" data-close aria-label="Voir la carte"><i class="ico close"></i></button>
+    <div class="dialog-inner result-inner"><button class="dismiss" data-close aria-label="View map"><i class="ico close"></i></button>
       <img id="result-art" src="art/flower.png" width="76" height="92" alt="">
-      <h2 id="result-title">Le quartier refleurit !</h2><p id="result-text"></p>
-      <div class="dialog-actions"><button class="primary" type="button" id="result-action">Quartier suivant</button><button class="border-button" type="button" id="result-replay">Rejouer</button></div>
+      <h2 id="result-title">The neighborhood is in bloom!</h2><p id="result-text"></p>
+      <div class="dialog-actions"><button class="primary" type="button" id="result-action">Next neighborhood</button><button class="border-button" type="button" id="result-replay">Play again</button></div>
     </div>
   </dialog>
   <dialog id="credits-dialog" aria-labelledby="credits-title">
-    <div class="dialog-inner"><button class="dismiss" data-close aria-label="Fermer"><i class="ico close"></i></button>
-      <div class="eyebrow">City Jam 2026</div><h2 id="credits-title">Crédits</h2>
-      <p>Jeu créé pour le thème « LIFE! ». Code, puzzles, pixel art, textes et sons de synthèse réalisés avec l’assistance d’une IA générative.</p>
-      <p>Polices sous licence SIL Open Font License&nbsp;: <a href="fonts/OFL-Young-Serif.txt">Young Serif</a> et <a href="fonts/OFL-DM-Sans.txt">DM Sans</a>.</p>
-      <button class="primary" data-close>Retour au jeu</button>
+    <div class="dialog-inner"><button class="dismiss" data-close aria-label="Close"><i class="ico close"></i></button>
+      <div class="eyebrow">City Jam 2026</div><h2 id="credits-title">Credits</h2>
+      <p>Created for the theme “LIFE!” Generative AI assisted with the code, puzzles, pixel art, writing and synthesized sounds.</p>
+      <p>Fonts licensed under the SIL Open Font License: <a href="fonts/OFL-Young-Serif.txt">Young Serif</a> and <a href="fonts/OFL-DM-Sans.txt">DM Sans</a>.</p>
+      <button class="primary" data-close>Back to the game</button>
     </div>
   </dialog>
-  <noscript>Active JavaScript pour jouer à Toits en fleurs.</noscript>
+  <noscript>Turn on JavaScript to play Rooftops in Bloom.</noscript>
   <script>document.getElementById('credits').addEventListener('click', () => document.getElementById('credits-dialog').showModal());</script>
 </body>
 </html>

@@ -100,3 +100,9 @@ kbd{font:600 .8rem var(--mono);background:#e8e9d9;border:1px solid #c2cab4;borde
   .board-actions{min-height:52px;padding:7px 11px}
   footer{padding-top:11px}
 }
+@media(max-width:440px){
+  .brand{font-size:clamp(1.2rem,5.6vw,1.54rem)}
+  .head-inner{gap:8px}
+  footer{flex-wrap:wrap;gap:6px 12px}
+  .foot-links{display:flex;align-items:center;flex-wrap:wrap}
+}

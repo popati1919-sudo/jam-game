@@ -91,16 +91,19 @@
       const canPlace = !!selected && !ended() && !moves().includes(selected);
       byId("plant").disabled = !canPlace;
       if (frame.complete) {
-        note("Tous les toits du quartier sont en fleurs !");
+        note("Every roof in this neighborhood is in bloom!");
       } else if (ended()) {
-        note("Réserve vide. Annule la dernière pose pour réessayer.");
+        note("Out of sprinklers. Undo your last move to try again.");
       } else if (id && moves().includes(id)) {
-        note("Un arroseur est déjà installé sur le toit " + id + ".");
+        note("Roof " + id + " already has a sprinkler.");
       } else if (id) {
         const count = frame.preview.filter(roof => !frame.watered.includes(roof)).length;
-        note("Toit " + id + " · " + (count ? count + (count === 1 ? " nouveau bac à arroser." : " nouveaux bacs à arroser.") : "Tous les bacs à portée sont déjà fleuris."));
+        const preview = count
+          ? "Waters " + count + (count === 1 ? " new planter." : " new planters.")
+          : "Every planter in reach is already in bloom.";
+        note("Roof " + id + " · " + preview);
       } else {
-        note("Sélectionne un toit sur la carte.");
+        note("Select a roof on the map.");
       }
       draw();
     }
@@ -120,13 +123,14 @@
       byId("reserve-total").textContent = String(level.budget);
       byId("undo").disabled = moves().length === 0;
       byId("sound").setAttribute("aria-pressed", String(progress.sound));
-      byId("sound-label").textContent = progress.sound ? "Son activé" : "Son coupé";
+      byId("sound-label").textContent = progress.sound ? "Sound on" : "Sound off";
       const descriptions = level.plots.map(plot => {
         const neighbors = coverage(level, plot.id).filter(id => id !== plot.id);
-        const status = moves().includes(plot.id) ? "avec arroseur" : frame.watered.includes(plot.id) ? "fleuri" : "à arroser";
-        return "Toit " + plot.id + ", " + status + ", voisins " + neighbors.join(", ") + ".";
+        const status = moves().includes(plot.id) ? "sprinkler installed" : frame.watered.includes(plot.id) ? "in bloom" : "needs water";
+        const adjacent = neighbors.length === 1 ? "Next to roof " : "Next to roofs ";
+        return "Roof " + plot.id + ", " + status + ". " + adjacent + neighbors.join(", ") + ".";
       }).join(" ");
-      byId("board-a11y").textContent = "Sélectionne un toit avec sa lettre ou les flèches, puis appuie sur Entrée pour arroser. " + descriptions;
+      byId("board-a11y").textContent = "Use a roof letter or the arrow keys to select a roof. Press Enter to place a sprinkler. " + descriptions;
       highlight();
     }
 
@@ -139,7 +143,7 @@
         button.className = "level-option";
         button.setAttribute("aria-current", String(progress.current === i));
         button.dataset.complete = String(progress.completed[i]);
-        const status = progress.completed[i] ? "Fleuri" : progress.moves[i].length ? "En cours" : "À fleurir";
+        const status = progress.completed[i] ? "In bloom" : progress.moves[i].length ? "In progress" : "Unplayed";
         const parts = { num: String(i + 1).padStart(2, "0"), name: level.name, status };
         for (const [suffix, text] of Object.entries(parts)) {
           const span = document.createElement("span");
@@ -171,16 +175,16 @@
       const count = progress.completed.filter(Boolean).length;
       const campaign = count === levels.length;
       if (frame.complete) {
-        byId("result-title").textContent = campaign ? "La ville est en fleurs !" : "Le quartier refleurit !";
+        byId("result-title").textContent = campaign ? "The city is in bloom!" : currentLevel().name + " is in bloom!";
         byId("result-text").textContent = campaign
-          ? "Des lilas jusqu’aux iris, tu as fait fleurir les cinq quartiers."
-          : "Tous les bacs sont arrosés. " + count + (count === 1 ? " quartier fleuri" : " quartiers fleuris") + " sur " + levels.length + ".";
-        byId("result-action").textContent = campaign ? "Voir les quartiers" : "Quartier suivant";
+          ? "From Lilac Square to Iris Hill, all five neighborhoods are in bloom."
+          : "Every planter is watered. You've brought " + count + " of " + levels.length + " neighborhoods into bloom.";
+        byId("result-action").textContent = campaign ? "View neighborhoods" : "Next neighborhood";
       } else {
         const left = currentLevel().plots.length - frame.watered.length;
-        byId("result-title").textContent = "La réserve est vide";
-        byId("result-text").textContent = left === 1 ? "Il reste un bac à arroser. Essaie un autre toit." : "Il reste " + left + " bacs à arroser. Essaie une autre disposition.";
-        byId("result-action").textContent = "Annuler la dernière pose";
+        byId("result-title").textContent = "Out of sprinklers";
+        byId("result-text").textContent = left === 1 ? "One planter still needs water. Try another roof." : left + " planters still need water. Try another layout.";
+        byId("result-action").textContent = "Undo last move";
       }
       result.dataset.outcome = frame.complete ? "win" : "retry";
       result.showModal();

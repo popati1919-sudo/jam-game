@@ -13,27 +13,27 @@
   }
 
   const levels = [
-    makeLevel("Le square des Lilas", "Les Faubourgs", 3, [
+    makeLevel("Lilac Square", "West End", 3, [
       "A.B",
       "CDE",
       ".F.",
     ]),
-    makeLevel("Passage du Canal", "Les Écluses", 3, [
+    makeLevel("Canal Walk", "The Locks", 3, [
       "ABC",
       "D..",
       "EFG",
     ]),
-    makeLevel("La cour des Merles", "La Vieille-Ville", 3, [
+    makeLevel("Blackbird Court", "Old Town", 3, [
       "ABC",
       "D.E",
       "FGH",
     ]),
-    makeLevel("Les Halles", "Le Marché central", 3, [
+    makeLevel("Market Hall", "Market District", 3, [
       "ABC",
       "DEF",
       "GHI",
     ]),
-    makeLevel("La butte aux Iris", "Les Hauts-Jardins", 2, [
+    makeLevel("Iris Hill", "Upper Gardens", 2, [
       "ABC",
       "DE.",
       "FG.",
