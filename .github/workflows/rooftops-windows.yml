@@ -1,0 +1,37 @@
+name: Build and test Rooftops for Windows
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'desktop/**'
+      - 'public/cityjam/**'
+      - '.github/workflows/rooftops-windows.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  portable:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+      - run: npm run build:win
+      - name: Play, restart and undo in the packaged executable
+        run: npm run test:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Rooftops-in-Bloom-Windows-x64
+          path: desktop/dist/Rooftops-in-Bloom-Windows-x64.exe
+          if-no-files-found: error
+          compression-level: 0

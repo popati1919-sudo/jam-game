@@ -1,0 +1,39 @@
+{
+  "name": "rooftops-in-bloom",
+  "productName": "Rooftops in Bloom",
+  "version": "1.0.0",
+  "description": "A rooftop gardening puzzle for City Jam.",
+  "author": "popati1919-sudo",
+  "private": true,
+  "main": "main.cjs",
+  "scripts": {
+    "build:win": "electron-builder --win portable --x64 --publish never",
+    "test:win": "node smoke.cjs"
+  },
+  "devDependencies": {
+    "electron": "45.4.1",
+    "electron-builder": "26.18.0",
+    "playwright-core": "1.65.1"
+  },
+  "build": {
+    "appId": "io.github.popati1919-sudo.rooftopsinbloom",
+    "asar": true,
+    "files": [
+      "main.cjs",
+      {
+        "from": "../public/cityjam",
+        "to": "game",
+        "filter": [
+          "**/*",
+          "!**/*.zip",
+          "!**/*.exe"
+        ]
+      }
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "icon.ico",
+      "artifactName": "Rooftops-in-Bloom-Windows-x64.exe"
+    }
+  }
+}
