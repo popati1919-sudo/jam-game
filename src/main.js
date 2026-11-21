@@ -62,7 +62,8 @@ s.add.text(p.x,p.y+18,t.building?'CHANTIER':'À CONSTRUIRE',{fontFamily:'monospa
 return;
 }
 const houses=['house1','house2','house3','house4'];
-const map={residential:houses[(x*3+y)%4],commercial:'shop',industrial:'factory',power:'power',water:'tower',park:'park',school:'school',clinic:'clinic',police:'police',fire:'fire',substation:'substation',pumping:'pump',reservoir:'reservoir'};
+const houseSeed=(Math.imul(x+17,374761393)^Math.imul(y+29,668265263))>>>0;
+const map={residential:houses[houseSeed%houses.length],commercial:'shop',industrial:'factory',power:'power',water:'tower',park:'park',school:'school',clinic:'clinic',police:'police',fire:'fire',substation:'substation',pumping:'pump',reservoir:'reservoir'};
 const sprite=map[t.type];
 if(sprite){place(sprite,0,64);return;}
 place('foundation',0,62);
@@ -86,8 +87,8 @@ if(tile.type==='residential'&&tile.building){tile.buildProgress=(tile.buildProgr
 }
 if(constructionFinished){notify('Résidence terminée : les premiers habitants peuvent arriver.');this.drawWorld();updateUI();}
 this.vehicleClock+=delta*state.speed;
-if(this.vehicleClock>=6500&&this.vehicles.length===0){this.vehicleClock=0;const route=this.findDestinationRoute();if(route&&route.length>1){const start=iso(route[0].x,route[0].y),target=route[route.length-1],truck=target.type==='residential'&&!get(target.x,target.y)?.built;const sprite=this.add.image(start.x,start.y,'city-upgrades',truck?8:9).setDisplaySize(truck?34:32,truck?27:24).setDepth(10000);this.vehicles.push({route,index:0,progress:0,sprite,truck,target});}}
-for(let i=this.vehicles.length-1;i>=0;i--){const v=this.vehicles[i];v.progress+=delta/1000*1.15;while(v.progress>=1&&v.index<v.route.length-1){v.progress-=1;v.index++;}if(v.index>=v.route.length-1){if(v.truck){const tile=get(v.target.x,v.target.y);if(tile&&tile.type==='residential'&&!tile.built&&!tile.building){tile.building=true;tile.buildProgress=0;tile.buildDuration=9000;notify('Le camion est arrivé : le chantier commence.');this.drawWorld();}}v.sprite.destroy();this.vehicles.splice(i,1);continue;}const a=iso(v.route[v.index].x,v.route[v.index].y),b=iso(v.route[v.index+1].x,v.route[v.index+1].y),t=v.progress;const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1;const laneX=(-dy/len)*5,laneY=(dx/len)*5;v.sprite.setPosition(Phaser.Math.Linear(a.x,b.x,t)+laneX,Phaser.Math.Linear(a.y,b.y,t)+laneY);v.sprite.setRotation(Math.atan2(dy,dx)+Math.PI);}
+if(this.vehicleClock>=6500&&this.vehicles.length===0){this.vehicleClock=0;const route=this.findDestinationRoute();if(route&&route.length>1){const start=iso(route[0].x,route[0].y),target=route[route.length-1],truck=target.type==='residential'&&!get(target.x,target.y)?.built;const frame=truck?8:(target.type==='industrial'?6:target.type==='commercial'?7:9);const sprite=this.add.image(start.x,start.y,'city-upgrades',frame).setDisplaySize(truck?34:33,truck?27:25).setDepth(10000);this.vehicles.push({route,index:0,progress:0,sprite,truck,target});}}
+for(let i=this.vehicles.length-1;i>=0;i--){const v=this.vehicles[i];v.progress+=delta/1000*1.15;while(v.progress>=1&&v.index<v.route.length-1){v.progress-=1;v.index++;}if(v.index>=v.route.length-1){if(v.truck){const tile=get(v.target.x,v.target.y);if(tile&&tile.type==='residential'&&!tile.built&&!tile.building){tile.building=true;tile.buildProgress=0;tile.buildDuration=9000;notify('Le camion est arrivé : le chantier commence.');this.drawWorld();}}v.sprite.destroy();this.vehicles.splice(i,1);continue;}const a=iso(v.route[v.index].x,v.route[v.index].y),b=iso(v.route[v.index+1].x,v.route[v.index+1].y),t=v.progress;const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1;const laneX=(-dy/len)*7,laneY=(dx/len)*7;v.sprite.setPosition(Phaser.Math.Linear(a.x,b.x,t)+laneX,Phaser.Math.Linear(a.y,b.y,t)+laneY);v.sprite.setFlipX(true);v.sprite.setRotation(Math.atan2(dy,dx));}
 }
 findDestinationRoute(){
 const queue=[],parent=new Map(),seen=new Set();
