@@ -24,7 +24,7 @@ function pollutionAt(x,y){let d=99;for(const [k,t] of Object.entries(state.tiles
 function playTone(freq=520,duration=.055){try{const ctx=new (window.AudioContext||window.webkitAudioContext)(),osc=ctx.createOscillator(),gain=ctx.createGain();osc.frequency.value=freq;gain.gain.setValueAtTime(.035,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+duration);osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+duration);osc.onended=()=>ctx.close();}catch{}}
 function drawTile(s,x,y,t){
 const p=iso(x,y),depth=y*GRID+x;
-const grass=riverAt(x,y)?0x75aeb0:((x*17+y*31)%5===0?0x71996a:((x+y)%2?0x729b6b:0x789f70));
+const season=Math.floor((state.day-1)/20)%4,baseGrass=riverAt(x,y)?0x75aeb0:((x*17+y*31)%5===0?0x71996a:((x+y)%2?0x729b6b:0x789f70)),seasonTint=[0x789f70,0x91a15f,0xa17e55,0x9ba9a2][season],grass=Phaser.Display.Color.Interpolate.ColorWithColor(Phaser.Display.Color.IntegerToColor(baseGrass),Phaser.Display.Color.IntegerToColor(seasonTint),1,.28);
 if(t?.type==='road'){
 s.add.rectangle(p.x,p.y,TILE_W+1,TILE_H+1,0x080a09).setDepth(depth);
 s.add.rectangle(p.x,p.y,TILE_W-3,TILE_H-3,0x59666b).setDepth(depth+.1);
@@ -74,8 +74,8 @@ return;
 const houses=['house1','house2','house3','house4'];
 const houseSeed=(Math.imul(x+17,374761393)^Math.imul(y+29,668265263))>>>0;
 const map={residential:houses[houseSeed%houses.length],commercial:'shop',industrial:'factory',power:'power',water:'tower',park:'park',school:'school',clinic:'clinic',police:'police',fire:'fire',substation:'substation',pumping:'pump',reservoir:'reservoir'};
-const sprite=map[t.type];
-if(sprite){place(sprite,0,64);return;}
+const sprite=t.type==='residential'?['house1','house2','house3','house4'][Math.max(0,Math.min(3,(t.niveau||1)-1))]:map[t.type];
+if(sprite){place(sprite,0,64);if(['residential','commercial'].includes(t.type)&&state.day%4===0){for(const [wx,wy] of [[-8,-15],[7,-13],[0,-4]])s.add.circle(p.x+wx,p.y+wy,1.8,0xffe58a,.95).setDepth(depth+4);}return;}
 place('foundation',0,62);
 if(t.building)place('crane',-18,58);
 }
