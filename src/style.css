@@ -17,3 +17,27 @@
 
 /* City Jam diagnostics and compact responsive controls */
 .panel-toggle{float:right;margin:-5px 0 0 8px;width:23px;height:22px;border:1px solid #425650;border-radius:4px;background:#263a40;color:#b4df72;font-weight:800;line-height:1}.overlays{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap}.overlay-btn{border:1px solid #49615a;border-radius:4px;background:#1d302f;color:#d4e2d8;padding:4px 6px;font:8px 'DM Mono';cursor:pointer}.overlay-btn.active{background:#b4df72;color:#17251f;border-color:#b4df72}.world-label{max-width:calc(100% - 28px)}.sidebar.collapsed{display:none!important}.layout.left-collapsed{grid-template-columns:0 minmax(0,1fr) 245px}.layout.right-collapsed{grid-template-columns:225px minmax(0,1fr) 0}.layout.left-collapsed.right-collapsed{grid-template-columns:0 minmax(0,1fr) 0}.save-row{flex-wrap:wrap}.save-row button{min-width:72px}@media(max-width:1366px){.topbar{gap:16px;padding:0 14px}.stats{gap:14px}.brand{min-width:185px}.layout{grid-template-columns:205px minmax(240px,1fr) 220px}.layout.left-collapsed{grid-template-columns:0 minmax(0,1fr) 220px}.layout.right-collapsed{grid-template-columns:205px minmax(0,1fr) 0}.layout.left-collapsed.right-collapsed{grid-template-columns:0 minmax(0,1fr) 0}}@media(max-width:900px){.layout{grid-template-columns:185px minmax(240px,1fr)}.layout.left-collapsed{grid-template-columns:0 minmax(0,1fr)}.layout.right-collapsed{grid-template-columns:185px minmax(0,1fr)}.layout.left-collapsed.right-collapsed{grid-template-columns:0 minmax(0,1fr)}.world-label{max-width:calc(100% - 12px)}.overlays{gap:3px}.overlay-btn{font-size:7px;padding:3px 4px}}@media(max-width:620px){.layout{grid-template-columns:125px minmax(0,1fr)}.layout.left-collapsed{grid-template-columns:0 minmax(0,1fr)}.layout.right-collapsed{grid-template-columns:125px minmax(0,1fr)}.layout.left-collapsed.right-collapsed{grid-template-columns:0 minmax(0,1fr)}.world-label{max-width:calc(100% - 10px);font-size:6px;padding:6px}.overlays{max-width:190px}.overlay-btn{font-size:6px}.save-row{gap:3px}.save-row button{font-size:8px;padding:6px 3px}}
+
+
+/* UI visibility and alignment fixes */
+#app.menu-open>.topbar,
+#app.menu-open>.layout,
+#app.menu-open>footer{visibility:hidden;pointer-events:none}
+#main-menu{background:rgba(7,15,20,.97);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:1000}
+#main-menu .menu-card{background:#172630;border:1px solid #71877a;box-shadow:0 24px 90px #000b;position:relative;z-index:1}
+#main-menu .menu-primary,#main-menu .menu-button{display:block;min-height:46px;position:relative;z-index:2;opacity:1;color:#edf5ee}
+#main-menu .menu-primary{background:#b4df72;color:#17251f}
+#main-menu .menu-foot{position:relative;z-index:1}
+.tool{min-height:38px;color:#e3ece9;background:#202f3b;border:1px solid #344652;opacity:1;visibility:visible}
+.tool span{display:block;flex:1;min-width:0;color:#e3ece9;opacity:1;visibility:visible;white-space:normal}
+.tool b{display:inline-grid;place-items:center;flex:0 0 18px;color:#b4df72;opacity:1}
+.tool kbd,.tool em{flex:0 0 auto;color:#b6c7c5;opacity:1}
+.tool.active{background:#30483f;border-color:#b4df72;color:#fff}
+.tool.active span{color:#fff}
+.tool-section{display:block;visibility:visible;opacity:1}
+.metric>div:first-child{display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:12px;width:100%;min-height:18px}
+.metric>div:first-child>span{flex:1;min-width:0;text-align:left}
+.metric>div:first-child>strong{flex:0 0 auto;margin-left:auto;text-align:right}
+.city-name h2{white-space:nowrap;word-break:normal;overflow-wrap:normal;font-size:clamp(19px,1.55vw,25px);letter-spacing:-.7px}
+footer{padding-left:22px;padding-right:22px;gap:16px}
+@media(max-width:620px){footer{padding-left:12px;padding-right:12px;gap:8px}}
