@@ -15,6 +15,20 @@
     { wall:'#e8b18c', side:'#bc8581', light:'#f9d2a3', ledge:'#bf826c', roof:'#e3bb93', rim:'#ffe0ae', shutter:'#81998a' },
     { wall:'#c9a2a5', side:'#a17886', light:'#e8bfba', ledge:'#a27679', roof:'#ccabb0', rim:'#f6cfb7', shutter:'#94758a' }
   ];
+  const atmospheres = [
+    { sky:['#efb9aa','#f2c0ac','#f5c7ad','#f8cdae','#fad2b0','#fbd7b2','#fcdcb6'],
+      far:'#e4b4af', near:'#d7aaad', trim:'#dfb5b1', farTrim:'#e9bdb5', sunX:431,
+      blooms:['#f88c72','#f7cb76','#f8ada3','#efa8c0','#e48882','#f7e2a0'] },
+    { sky:['#a9c9cf','#b6d0d0','#c4d6d0','#d2dcd0','#e0e1ce','#eae3c9','#f3e4c3'],
+      far:'#c9c0b9', near:'#b7a8ae', trim:'#d0bfba', farTrim:'#d6cac0', sunX:386,
+      blooms:['#adc5f0','#edb0c4','#ffe182','#9bd0bd','#e8b4e4','#ffdcb1'] },
+    { sky:['#c6afc8','#d2b6c8','#dcbdc8','#e4c4c7','#ebcbc6','#f1d1c4','#f6d8c1'],
+      far:'#d6b0b8', near:'#bea0b0', trim:'#d4b5be', farTrim:'#dfc0c1', sunX:452,
+      blooms:['#e6afe2','#c0b2ed','#ffcc98','#f495a8','#f6d4de','#b4cbee'] },
+    { sky:['#f2c994','#f4ce99','#f6d29f','#f8d6a5','#fadaac','#fcdfb3','#fde3b9'],
+      far:'#daba9f', near:'#caa795', trim:'#dbbca7', farTrim:'#e8c9aa', sunX:401,
+      blooms:['#ffe1a1','#f8ab6a','#f5bd85','#ed9cae','#ffd568','#f3d6c4'] }
+  ];
   const heights = [51,36,48,40,51,38,49,38,32];
   const glyphs = {
     A:['010','101','111','101','101'], B:['110','101','110','101','110'],
@@ -93,18 +107,19 @@
     rect(x,y,l,2,c);rect(x+5*s,y-2*s,l-8*s,2*s,c);
     rect(x+12*s,y-4*s,l-23*s,2*s,c);rect(x+14*s,y-6*s,9*s,2*s,c);
   }
-  function cityBack() {
+  function cityBack(atmosphere,variation) {
     // Long horizontal bands give the sky the palette of a printed sunset.
-    const sky=['#efb9aa','#f2c0ac','#f5c7ad','#f8cdae','#fad2b0','#fbd7b2','#fcdcb6'];
+    const {sky,sunX}=atmosphere;
     rect(0,0,W,H,sky[sky.length-1]);
     sky.forEach((color,i)=>rect(0,i*14,W,15,color));
-    disk(431,49,19,'#ffe6b2');disk(431,48,16,'#ffedba');
+    disk(sunX,49,19,'#ffe6b2');disk(sunX,48,16,'#ffedba');
     cloud(16,53,67,'#ffdfba',1);cloud(95,25,47,'#fdd8b7',1);
     cloud(277,40,78,'#ffddba',1);cloud(452,29,57,'#fad3b5',1);
     cloud(175,63,35,'#ffe4c6',1);cloud(398,61,51,'#ffe0b6',1);
-    const random=rng(434);
+    const random=rng(434+variation);
     for(let layer=0;layer<2;layer++){
-      const base=layer?128:103, color=layer?'#d7aaad':'#e4b4af', trim=layer?'#dfb5b1':'#e9bdb5';
+      const base=layer?128:103, color=layer?atmosphere.near:atmosphere.far;
+      const trim=layer?atmosphere.trim:atmosphere.farTrim;
       for(let x=-10;x<W+5;){
         const w=7+Math.floor(random()*21), h=8+Math.floor(random()*27), y=base-h;
         rect(x,y,w,h,color);
@@ -281,11 +296,10 @@
   function leaf(x,y,c1,c2){
     rect(x,y-3,1,4,'#596a50');rect(x-2,y-4,2,2,c1);rect(x+1,y-5,2,2,c2);
   }
-  function drawBed(p,h,watered,seed) {
+  function drawBed(p,h,watered,seed,blooms) {
     const x=p.x,y=p.y;
     box(x-.179,y-.18,x+.209,y+.173,h+.4,3,'#d4a27b','#ac745c','#8c6058');
     deck(x-.155,y-.152,x+.184,y+.149,h+3.6,watered?'#6f7854':'#926b5e');
-    const blooms=['#f88c72','#f7cb76','#f8ada3','#efa8c0','#e48882','#f7e2a0'];
     const random=rng(501+seed);
     for(let i=0;i<4;i++)for(let j=0;j<4;j++){
       const q=proj(x-.105+i*.075,y-.105+j*.07,h+4);
@@ -315,19 +329,27 @@
     }
   }
   function badgePos(p){const q=proj(p.x+.245,p.y+.23,buildingHeight(p)+4);return [Math.round(q[0]),Math.round(q[1])];}
-  function badge(p,watered,hover){
+  function badge(p,watered,hover,blocked){
     const [x,y]=badgePos(p), color=hover?'#477e78':watered?'#526d55':'#604752';
     rect(x-7,y-11,15,15,'#ad8b7b');rect(x-7,y-12,15,14,cream);rect(x-8,y-11,17,12,cream);
     rect(x-6,y-11,13,12,color);rect(x-7,y-10,15,10,color);
+    if(blocked){
+      // Keep the plot letter readable and the brass lock visible even after bloom.
+      rect(x+7,y-11,14,15,'#ad8b7b');rect(x+7,y-12,14,14,cream);
+      rect(x+8,y-11,12,12,'#4e404c');rect(x+11,y-10,5,1,'#ffe0a4');
+      rect(x+10,y-9,2,4,'#ffe0a4');rect(x+15,y-9,2,4,'#ffe0a4');
+      rect(x+9,y-6,9,6,'#efbe6e');rect(x+13,y-4,1,3,'#654853');
+    }
     const g=glyphs[p.id];
     if(g)g.forEach((r,j)=>[...r].forEach((v,i)=>{if(v==='1')rect(x-3+i*2,y-10+j*2,2,2,cream);}));
   }
-  function building(p,state){
-    const x=p.x,y=p.y,n=y*3+x,h=buildingHeight(p),pal=palettes[n];
+  function building(p,state,blocked,variation,atmosphere){
+    const x=p.x,y=p.y,n=y*3+x,h=buildingHeight(p);
+    const pal=palettes[(n+variation)%palettes.length], windowSeed=n+variation%27;
     const b=.377, roof=.397;
     deck(x-b+.05,y-b+.075,x+b+.07,y+b+.09,2,'#ac9890');
     box(x-b,y-b,x+b,y+b,2,h-2,pal.roof,pal.wall,pal.side);
-    facade(p,'left',h,pal,n+7);facade(p,'right',h,pal,n+16);
+    facade(p,'left',h,pal,windowSeed+7);facade(p,'right',h,pal,windowSeed+16);
     box(x-roof,y-roof,x+roof,y+roof,h-3,4,pal.roof,pal.ledge,pal.ledge);
     const top=quad(x-roof,y-roof,x+roof,y+roof,h+1);
     ring(top,pal.rim);
@@ -358,9 +380,9 @@
       ring(border,hover?'#fff7d1':'#95e7cf');
       if(hover)ring(quad(x-.326,y-.326,x+.326,y+.326,h+2),'#6d9d8c');
     }
-    drawBed(p,h+1,watered,n);
+    drawBed(p,h+1,watered,n,atmosphere.blooms);
     if(state.used.includes(p.id))sprinkler(p,h);
-    badge(p,watered,hover);
+    badge(p,watered,hover,blocked);
   }
   function tree(x,y,size,shade) {
     const [u,v]=proj(x,y,2),s=size;
@@ -444,12 +466,14 @@
     rect(u-1,v-10,3,3,head);rect(u-1,v-11,3,1,'#7f6659');rect(u+2,v-6,1,2,head);
   }
   function compose(level,state){
-    cityBack();slab();
+    const variation=level.round ? 1+(((level.seed>>>0)+level.round-1)>>>0) : 0;
+    const atmosphere=atmospheres[variation%atmospheres.length], blocked=level.blocked || [];
+    cityBack(atmosphere,variation);slab();
     const grid=new Map(level.plots.map(p=>[p.x+','+p.y,p]));
     const props=[];
     function add(x,y,f){props.push({depth:x+y, paint:f});}
     for(let y=0;y<3;y++)for(let x=0;x<3;x++){
-      const p=grid.get(x+','+y);add(x,y,()=>p?building(p,state):grass(x,y,y*3+x));
+      const p=grid.get(x+','+y);add(x,y,()=>p?building(p,state,blocked.includes(p.id),variation,atmosphere):grass(x,y,y*3+x));
     }
     for(const [x,y] of [[-.48,.52],[-.49,1.54],[1.45,-.46],[2.48,.52],[.5,2.48],[2.48,1.53],[1.52,2.5]])
       add(x,y,()=>lamppost(x,y));
@@ -473,7 +497,8 @@
     const backToFront=level.plots.slice().sort((a,b)=>b.x+b.y-a.x-a.y);
     for(const p of backToFront){
       const [u,v]=badgePos(p);
-      if((Math.abs(x-u)<=9 && y>=v-13 && y<=v+3)||isOnRoof(x,y,p))return p.id;
+      const badgeRight=level.blocked?.includes(p.id)?21:9;
+      if((x>=u-9 && x<=u+badgeRight && y>=v-13 && y<=v+3)||isOnRoof(x,y,p))return p.id;
     }
     return null;
   }
@@ -498,7 +523,7 @@
       const off=canvas.ownerDocument.createElement('canvas');
       off.width=W;off.height=H;saved={off,key:null};cache.set(canvas,saved);
     }
-    const key=JSON.stringify([level.plots,state.watered,state.preview,state.used,state.hover]);
+    const key=JSON.stringify([level.plots,level.round,level.seed,level.blocked,state.watered,state.preview,state.used,state.hover]);
     if(saved.key!==key){
       ctx=saved.off.getContext('2d');compose(level,state);saved.key=key;
     }

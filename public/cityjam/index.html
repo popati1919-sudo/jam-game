@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f5f1e6">
-  <meta name="description" content="Bring five neighborhoods back to life, one rooftop garden at a time. A pixel art puzzle game for City Jam 2026.">
+  <meta name="description" content="Bring five neighborhoods back to life, then grow an endless city of rooftop gardens. A pixel art puzzle game for City Jam 2026.">
   <title>Rooftops in Bloom — City Jam</title>
   <link rel="icon" type="image/png" href="art/logo.png">
   <link rel="stylesheet" href="style.css">
@@ -25,10 +25,13 @@
   <main>
     <div class="level-head">
       <div>
-        <div class="eyebrow heading-tag"><span class="level-marker" aria-hidden="true"></span>Neighborhood <span id="level-num">01</span><span class="level-outof">/ 05</span></div>
+        <div class="eyebrow heading-tag"><span class="level-marker" aria-hidden="true"></span><span id="mode-label">Neighborhood</span> <span id="level-num">01</span><span class="level-outof" id="level-total">/ 05</span></div>
         <h1 id="level-title">Lilac Square</h1>
       </div>
-      <button type="button" id="level-menu" class="border-button"><i class="ico map"></i>Neighborhoods</button>
+      <div class="mode-actions" role="group" aria-label="Choose a game mode">
+        <button type="button" id="level-menu" class="border-button"><i class="ico map"></i>Neighborhoods</button>
+        <button type="button" id="endless-mode" class="border-button" aria-pressed="false">Endless mode</button>
+      </div>
     </div>
     <div class="game-layout">
       <section class="board-frame" aria-label="Neighborhood map">
@@ -46,6 +49,7 @@
           <div class="eyebrow"><i class="ico sprout"></i>Goal</div>
           <h2>Make every<br> roof bloom.</h2>
           <p>A sprinkler waters its own roof and the roofs directly beside it.</p>
+          <p id="locked-tip" hidden>Locked roofs need water from a neighbor.</p>
           <div class="growth">
             <div class="count-line"><span>Roofs in bloom</span><span class="fraction"><b id="water-count">0</b> / <span id="water-total">6</span></span></div>
             <div class="growth-track"><div id="growth-bar"></div></div>
@@ -73,6 +77,7 @@
       <div class="how-grid" aria-hidden="true"><b></b><b>✿</b><b></b><b>✿</b><b>✦</b><b>✿</b><b></b><b>✿</b><b></b></div>
       <p>Make every roof bloom before you run out of sprinklers. A sprinkler waters its own roof and any roof one space north, south, east or west.</p>
       <p>Select a roof’s letter to preview the roofs it will water. Choose <strong>Place sprinkler</strong> or select the same roof again to place it there. You can place a sprinkler on a roof that’s already in bloom.</p>
+      <p><strong>Endless mode</strong> grows a new garden each time you finish one. Later gardens have locked roofs. Place a sprinkler next door to make them bloom.</p>
       <p class="key-tip">To play with a keyboard, focus the map. Choose a roof with the arrow keys or its letter. Press <kbd>Enter</kbd> to place a sprinkler.</p>
       <button class="primary" data-close>Got it</button>
     </div>
@@ -81,6 +86,7 @@
     <div class="dialog-inner"><button class="dismiss" data-close aria-label="Close"><i class="ico close"></i></button>
       <div class="eyebrow"><i class="ico map"></i>City map</div><h2 id="map-title">Neighborhoods</h2>
       <div id="level-options" class="level-options"></div>
+      <button type="button" id="endless-option" class="border-button">Start endless mode</button>
     </div>
   </dialog>
   <dialog id="result-dialog" aria-labelledby="result-title">

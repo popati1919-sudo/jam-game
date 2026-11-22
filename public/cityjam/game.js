@@ -2,7 +2,7 @@
   "use strict";
 
   function start() {
-    const { levels, coverage, watered, isSolved } = window.RoofPuzzle;
+    const { levels, endlessLevel, coverage, watered, isSolved } = window.RoofPuzzle;
     const city = window.CityView;
     const byId = id => document.getElementById(id);
     const board = byId("board");
@@ -11,7 +11,13 @@
     const help = byId("help-dialog");
     const key = "toits-en-fleurs.progress.v1";
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const fresh = () => ({ current: 0, sound: false, moves: levels.map(() => []), completed: levels.map(() => false) });
+    const fresh = () => ({ mode: "campaign", current: 0, sound: false, moves: levels.map(() => []), completed: levels.map(() => false), endless: null });
+
+    function restoreMoves(level, data) {
+      if (!Array.isArray(data)) return [];
+      const legal = level.plots.map(plot => plot.id).filter(id => !level.blocked?.includes(id));
+      return [...new Set(data.filter(id => legal.includes(id)))].slice(0, level.budget);
+    }
 
     function restore() {
       const saved = fresh();
@@ -21,13 +27,16 @@
         if (Number.isInteger(data.current) && levels[data.current]) saved.current = data.current;
         saved.sound = data.sound === true;
         levels.forEach((level, i) => {
-          const oldMoves = data.moves?.[i];
-          if (Array.isArray(oldMoves)) {
-            const legal = oldMoves.filter(id => level.plots.some(plot => plot.id === id));
-            saved.moves[i] = Array.from(new Set(legal)).slice(0, level.budget);
-          }
+          saved.moves[i] = restoreMoves(level, data.moves?.[i]);
           saved.completed[i] = data.completed?.[i] === true || isSolved(level, saved.moves[i]);
         });
+        const endless = data.endless;
+        if (endless && Number.isInteger(endless.seed) && endless.seed >= 0 && endless.seed <= 0xffffffff
+            && Number.isSafeInteger(endless.round) && endless.round >= 1) {
+          const level = endlessLevel(endless.round, endless.seed);
+          saved.endless = { seed: endless.seed, round: endless.round, moves: restoreMoves(level, endless.moves) };
+          if (data.mode === "endless") saved.mode = "endless";
+        }
       } catch {
         // A new game also works when browser storage is unavailable.
       }
@@ -35,8 +44,11 @@
     }
 
     const progress = restore();
-    const currentLevel = () => levels[progress.current];
-    const moves = () => progress.moves[progress.current];
+    const inEndless = () => progress.mode === "endless";
+    const moves = () => inEndless() ? progress.endless.moves : progress.moves[progress.current];
+    let garden = progress.endless && endlessLevel(progress.endless.round, progress.endless.seed);
+    const currentLevel = () => inEndless() ? garden : levels[progress.current];
+    const isBlocked = id => currentLevel().blocked?.includes(id) === true;
     let selected = null;
     let hovered = null;
     let resultTimer = 0;
@@ -87,13 +99,15 @@
     function highlight() {
       const id = ended() ? null : hovered || selected;
       frame.hover = id;
-      frame.preview = id ? coverage(currentLevel(), id) : [];
-      const canPlace = !!selected && !ended() && !moves().includes(selected);
+      frame.preview = id && !isBlocked(id) ? coverage(currentLevel(), id) : [];
+      const canPlace = !!selected && !ended() && !moves().includes(selected) && !isBlocked(selected);
       byId("plant").disabled = !canPlace;
       if (frame.complete) {
         note("Every roof in this neighborhood is in bloom!");
       } else if (ended()) {
         note("Out of sprinklers. Undo your last move to try again.");
+      } else if (id && isBlocked(id)) {
+        note("Roof " + id + " is locked. Water it from an adjacent roof.");
       } else if (id && moves().includes(id)) {
         note("Roof " + id + " already has a sprinkler.");
       } else if (id) {
@@ -113,9 +127,14 @@
       frame = {
         used: moves(), watered: watered(level, moves()), preview: [], hover: null, complete: isSolved(level, moves()),
       };
-      byId("level-num").textContent = String(progress.current + 1).padStart(2, "0");
+      byId("mode-label").textContent = inEndless() ? "Endless garden" : "Neighborhood";
+      byId("level-num").textContent = String(inEndless() ? progress.endless.round : progress.current + 1).padStart(2, "0");
+      byId("level-total").textContent = inEndless() ? "" : "/ " + String(levels.length).padStart(2, "0");
+      byId("endless-mode").setAttribute("aria-pressed", String(inEndless()));
+      byId("endless-mode").title = inEndless() ? "Return to the campaign" : "Play Endless Mode";
       byId("level-title").textContent = level.name;
       byId("district-name").textContent = level.district;
+      byId("locked-tip").hidden = !level.blocked?.length;
       byId("water-count").textContent = String(frame.watered.length);
       byId("water-total").textContent = String(level.plots.length);
       byId("growth-bar").style.width = (100 * frame.watered.length / level.plots.length) + "%";
@@ -128,7 +147,8 @@
         const neighbors = coverage(level, plot.id).filter(id => id !== plot.id);
         const status = moves().includes(plot.id) ? "sprinkler installed" : frame.watered.includes(plot.id) ? "in bloom" : "needs water";
         const adjacent = neighbors.length === 1 ? "Next to roof " : "Next to roofs ";
-        return "Roof " + plot.id + ", " + status + ". " + adjacent + neighbors.join(", ") + ".";
+        const locked = isBlocked(plot.id) ? " Locked: water it from an adjacent roof." : "";
+        return "Roof " + plot.id + ", " + status + "." + locked + " " + adjacent + neighbors.join(", ") + ".";
       }).join(" ");
       byId("board-a11y").textContent = "Use a roof letter or the arrow keys to select a roof. Press Enter to place a sprinkler. " + descriptions;
       highlight();
@@ -141,7 +161,7 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = "level-option";
-        button.setAttribute("aria-current", String(progress.current === i));
+        button.setAttribute("aria-current", String(!inEndless() && progress.current === i));
         button.dataset.complete = String(progress.completed[i]);
         const status = progress.completed[i] ? "In bloom" : progress.moves[i].length ? "In progress" : "Unplayed";
         const parts = { num: String(i + 1).padStart(2, "0"), name: level.name, status };
@@ -157,29 +177,72 @@
         });
         list.append(button);
       });
+      byId("endless-option").textContent = !progress.endless ? "Start Endless Mode"
+        : isSolved(garden, progress.endless.moves) ? "Play endless garden " + (progress.endless.round + 1)
+        : "Resume endless garden " + progress.endless.round;
       map.showModal();
     }
 
-    function switchTo(index) {
+    function enterBoard(showOutcome = true) {
       clearTimeout(resultTimer);
-      progress.current = index;
       hovered = selected = null;
       save();
       update();
       board.focus({ preventScroll: true });
-      if (ended()) showResult();
+      if (showOutcome && ended()) showResult();
+    }
+
+    function switchTo(index) {
+      progress.mode = "campaign";
+      progress.current = index;
+      enterBoard();
+    }
+
+    function enterEndless() {
+      if (!progress.endless) {
+        const seed = window.crypto?.getRandomValues(new Uint32Array(1))[0] ?? Math.floor(Math.random() * 0x100000000);
+        progress.endless = { seed, round: 1, moves: [] };
+      } else if (isSolved(garden, progress.endless.moves)) {
+        progress.endless.round++;
+        progress.endless.moves = [];
+      }
+      garden = endlessLevel(progress.endless.round, progress.endless.seed);
+      progress.mode = "endless";
+      enterBoard();
+    }
+
+    function nextCampaignLevel() {
+      for (let offset = 1; offset <= levels.length; offset++) {
+        const i = (progress.current + offset) % levels.length;
+        if (!progress.completed[i]) return i;
+      }
+      return -1;
+    }
+
+    function returnToCampaign() {
+      const previous = progress.current;
+      if (!isSolved(levels[previous], progress.moves[previous])) return switchTo(previous);
+      const next = nextCampaignLevel();
+      if (next >= 0) return switchTo(next);
+      progress.mode = "campaign";
+      enterBoard(false);
+      menu();
     }
 
     function showResult() {
       if (!ended() || document.querySelector("dialog[open]")) return;
       const count = progress.completed.filter(Boolean).length;
       const campaign = count === levels.length;
-      if (frame.complete) {
+      if (frame.complete && inEndless()) {
+        byId("result-title").textContent = currentLevel().name + " is in bloom!";
+        byId("result-text").textContent = "Every roof in garden " + progress.endless.round + " is watered. A new garden is ready.";
+        byId("result-action").textContent = "Next garden";
+      } else if (frame.complete) {
         byId("result-title").textContent = campaign ? "The city is in bloom!" : currentLevel().name + " is in bloom!";
         byId("result-text").textContent = campaign
-          ? "From Lilac Square to Iris Hill, all five neighborhoods are in bloom."
+          ? "From Lilac Square to Iris Hill, all five neighborhoods are in bloom. Keep growing in Endless Mode."
           : "Every planter is watered. You've brought " + count + " of " + levels.length + " neighborhoods into bloom.";
-        byId("result-action").textContent = campaign ? "View neighborhoods" : "Next neighborhood";
+        byId("result-action").textContent = campaign ? "Play Endless Mode" : "Next neighborhood";
       } else {
         const left = currentLevel().plots.length - frame.watered.length;
         byId("result-title").textContent = "Out of sprinklers";
@@ -191,11 +254,11 @@
     }
 
     function place() {
-      if (!selected || ended() || moves().includes(selected)) return;
+      if (!selected || ended() || moves().includes(selected) || isBlocked(selected)) return;
       moves().push(selected);
       hovered = selected = null;
       update();
-      if (frame.complete) progress.completed[progress.current] = true;
+      if (frame.complete && !inEndless()) progress.completed[progress.current] = true;
       save();
       chime(frame.complete ? [392, 494, 587, 784] : [523.25, 659.25]);
       if (ended()) {
@@ -214,7 +277,7 @@
 
     function replay() {
       clearTimeout(resultTimer);
-      progress.moves[progress.current] = [];
+      moves().length = 0;
       hovered = selected = null;
       save();
       update();
@@ -278,6 +341,8 @@
     byId("restart").addEventListener("click", replay);
     byId("help").addEventListener("click", () => help.showModal());
     byId("level-menu").addEventListener("click", menu);
+    byId("endless-mode").addEventListener("click", () => inEndless() ? returnToCampaign() : enterEndless());
+    byId("endless-option").addEventListener("click", () => { map.close(); enterEndless(); });
     byId("sound").addEventListener("click", () => {
       progress.sound = !progress.sound;
       save();
@@ -292,11 +357,10 @@
         board.focus({ preventScroll: true });
         return;
       }
-      for (let offset = 1; offset <= levels.length; offset++) {
-        const next = (progress.current + offset) % levels.length;
-        if (!progress.completed[next]) return switchTo(next);
-      }
-      menu();
+      if (inEndless()) return enterEndless();
+      const next = nextCampaignLevel();
+      if (next >= 0) switchTo(next);
+      else enterEndless();
     });
     document.querySelectorAll("[data-close]").forEach(button => {
       button.addEventListener("click", () => {
@@ -304,7 +368,7 @@
         if (dialog?.open) dialog.close();
       });
     });
-    for (const dialog of [map, help, result]) {
+    for (const dialog of [map, help, result, byId("credits-dialog")]) {
       dialog.addEventListener("click", event => {
         if (event.target !== dialog) return;
         const b = dialog.getBoundingClientRect();

@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    tags: ['rooftops-in-bloom-v*']
     paths:
       - 'desktop/**'
       - 'public/cityjam/**'
@@ -13,6 +14,7 @@ permissions:
 
 jobs:
   portable:
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     runs-on: windows-2022
     timeout-minutes: 20
     defaults:
@@ -27,11 +29,62 @@ jobs:
           cache-dependency-path: desktop/package-lock.json
       - run: npm ci
       - run: npm run build:win
-      - name: Play, restart and undo in the packaged executable
+      - name: Play the campaign and endless mode in the packaged game
         run: npm run test:win
+      - name: Record the tested executable digest
+        shell: pwsh
+        run: |
+          $exe = "Rooftops-in-Bloom-Windows-x64.exe"
+          $digest = (Get-FileHash "dist/$exe" -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$digest  $exe" | Set-Content -Encoding ascii dist/SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: Rooftops-in-Bloom-Windows-x64
-          path: desktop/dist/Rooftops-in-Bloom-Windows-x64.exe
+          path: |
+            desktop/dist/Rooftops-in-Bloom-Windows-x64.exe
+            desktop/dist/SHA256SUMS
           if-no-files-found: error
           compression-level: 0
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/rooftops-in-bloom-v')
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXE: Rooftops-in-Bloom-Windows-x64.exe
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate the successful Windows build for this exact commit
+        id: build
+        run: |
+          commit=$(git rev-parse HEAD)
+          run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow rooftops-windows.yml \
+            --branch main --event push --commit "$commit" --status success --limit 1 \
+            --json databaseId --jq '.[0].databaseId // empty')
+          test -n "$run_id" || { echo "The tagged commit needs a successful Windows build on main."; exit 1; }
+          echo "id=$run_id" >> "$GITHUB_OUTPUT"
+      - uses: actions/download-artifact@v4
+        with:
+          name: Rooftops-in-Bloom-Windows-x64
+          path: release
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.build.outputs.id }}
+      - name: Publish the verified portable game
+        run: |
+          cd release
+          sha256sum --check SHA256SUMS
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            actual=$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json assets \
+              --jq '.assets[] | select(.name == "Rooftops-in-Bloom-Windows-x64.exe") | .digest')
+            if [ -z "$actual" ]; then gh release upload "$GITHUB_REF_NAME" "$EXE" --repo "$GITHUB_REPOSITORY"; fi
+          else
+            gh release create "$GITHUB_REF_NAME" "$EXE" --repo "$GITHUB_REPOSITORY" --verify-tag \
+              --title "Rooftops in Bloom — Windows x64" --notes-file ../desktop/RELEASE_NOTES.md
+          fi
+          expected="sha256:$(cut -d ' ' -f 1 SHA256SUMS)"
+          digest=$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json assets \
+            --jq '.assets[] | select(.name == "Rooftops-in-Bloom-Windows-x64.exe") | .digest')
+          test "$digest" = "$expected"

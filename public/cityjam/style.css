@@ -106,3 +106,15 @@ kbd{font:600 .8rem var(--mono);background:#e8e9d9;border:1px solid #c2cab4;borde
   footer{flex-wrap:wrap;gap:6px 12px}
   .foot-links{display:flex;align-items:center;flex-wrap:wrap}
 }
+
+.mode-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.mode-actions #level-menu{margin-bottom:0}
+#endless-mode::before,#endless-option::before{content:"∞";font:700 1.35em/1 Georgia,serif}
+#endless-mode[aria-pressed="true"]{background:var(--deep);color:var(--paper);border-color:var(--deep)}
+#endless-option{margin-top:14px}
+.goal-card #locked-tip{font-size:.87rem;line-height:1.35;color:#daebbf;margin-top:9px}
+@media(max-width:650px){
+  .level-head{align-items:flex-start;flex-direction:column;gap:10px}
+  .mode-actions{gap:6px}
+  .mode-actions .border-button{min-height:36px}
+}

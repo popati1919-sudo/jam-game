@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const { spawn } = require("node:child_process");
 const { once } = require("node:events");
+const { readFileSync } = require("node:fs");
 const { createServer } = require("node:net");
 const path = require("node:path");
 const { setTimeout: delay } = require("node:timers/promises");
@@ -35,7 +36,6 @@ async function launchAndCheck(check) {
     await page.locator("#board").waitFor();
     assert.match(await page.title(), /Rooftops in Bloom/i);
     assert.equal(await page.locator("html").getAttribute("lang"), "en");
-    assert.equal(await page.locator("#level-title").textContent(), "Lilac Square");
     assert.equal(await page.locator(".desktop-download").isVisible(), false);
     await page.evaluate(() => document.fonts.ready.then(() => true));
     assert.ok(await page.evaluate(() => document.fonts.check('16px "Young Serif"')));
@@ -59,8 +59,44 @@ async function launchAndCheck(check) {
   }
 }
 
+async function playFirstEndlessGarden(page) {
+  await page.locator("#endless-mode").click();
+  assert.equal(await page.locator("#endless-mode").getAttribute("aria-pressed"), "true");
+  assert.equal(Number(await page.locator("#level-num").textContent()), 1);
+
+  // Discover a minimum cover with the same public rules as the player. Every
+  // placement and the transition to the next garden go through the real UI.
+  const solution = await page.evaluate(() => {
+    const { round, seed } = JSON.parse(localStorage.getItem("toits-en-fleurs.progress.v1")).endless;
+    const level = window.RoofPuzzle.endlessLevel(round, seed);
+    const allowed = level.plots.map(plot => plot.id).filter(id => !level.blocked.includes(id));
+    let best = null;
+    for (let mask = 1; mask < 2 ** allowed.length; mask++) {
+      const selected = allowed.filter((_, i) => (mask & (1 << i)) !== 0);
+      if (selected.length > level.budget || (best && selected.length >= best.length)) continue;
+      if (window.RoofPuzzle.isSolved(level, selected)) best = selected;
+    }
+    return best;
+  });
+  assert.ok(solution?.length, "The generated garden has a valid cover");
+  for (const roof of solution) {
+    await page.locator("#board").press(roof.toLowerCase());
+    await page.locator("#plant").click();
+  }
+  await page.locator("#result-dialog[open]").waitFor();
+  await page.locator("#result-action").click();
+  assert.equal(Number(await page.locator("#level-num").textContent()), 2);
+}
+
 async function smoke() {
+  // The portable self-extractor has its own stub. Verify the actual game
+  // executable's PE machine type in the payload sent to the portable packager.
+  const game = readFileSync(path.join(__dirname, "dist", "win-unpacked", "Rooftops in Bloom.exe"));
+  const header = game.readUInt32LE(0x3c);
+  assert.equal(game.toString("ascii", header, header + 4), "PE\0\0");
+  assert.equal(game.readUInt16LE(header + 4), 0x8664, "Expected an x64 game executable");
   await launchAndCheck(async page => {
+    assert.equal(await page.locator("#level-title").textContent(), "Lilac Square");
     assert.equal(await page.locator("#water-count").textContent(), "0");
     await page.locator("#board").press("a");
     await page.locator("#plant").click();
@@ -68,11 +104,20 @@ async function smoke() {
     assert.equal(await page.locator("#reserve").textContent(), "2");
   });
   await launchAndCheck(async page => {
+    assert.equal(await page.locator("#level-title").textContent(), "Lilac Square");
     assert.equal(await page.locator("#water-count").textContent(), "2", "Previous turn must survive relaunch");
     await page.locator("#undo").click();
     assert.equal(await page.locator("#water-count").textContent(), "0");
     assert.equal(await page.locator("#reserve").textContent(), "3");
+    await playFirstEndlessGarden(page);
   });
-  console.log("Placement, persistence across restart and undo passed.");
+  await launchAndCheck(async page => {
+    assert.equal(await page.locator("#endless-mode").getAttribute("aria-pressed"), "true");
+    assert.equal(Number(await page.locator("#level-num").textContent()), 2, "Endless garden must survive relaunch");
+    await page.locator("#endless-mode").click();
+    assert.equal(await page.locator("#level-title").textContent(), "Lilac Square");
+    assert.equal(await page.locator("#water-count").textContent(), "0");
+  });
+  console.log("x64 payload, campaign turns and saves, endless victory, progression and resume passed.");
 }
 smoke().catch(error => { console.error(error); process.exitCode = 1; });

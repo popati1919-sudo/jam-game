@@ -8,7 +8,7 @@ https://popati1919-sudo.github.io/jam-game/
 
 ## Rooftops in Bloom · City Jam
 
-Bring five city districts into bloom with a handful of sprinklers. Each sprinkler waters its own rooftop and the rooftops immediately north, south, east, and west. Place them where they can reach every rooftop before your supply runs out.
+Place a handful of sprinklers to bring every rooftop into bloom. Each sprinkler waters its own rooftop and any rooftops immediately north, south, east, and west. Play the five hand-crafted campaign neighborhoods, or choose **Endless** for a continuing series of rooftop puzzles. From the seventh Endless garden onward, some rooftops are locked. Water them from the rooftops next door.
 
 [Play in your browser](https://popati1919-sudo.github.io/jam-game/cityjam/) · [Download for Windows](https://github.com/popati1919-sudo/jam-game/releases/tag/rooftops-in-bloom-v1.0.0) · [Download the HTML game for itch.io](https://popati1919-sudo.github.io/jam-game/cityjam/rooftops-in-bloom-itch.zip) · [View the source](public/cityjam/)
 
